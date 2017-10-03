@@ -240,7 +240,7 @@ class Regnskab(object):
                 os.remove(fil)
 
         if (self._xbrl_extension is not None and
-            os.path.isdir(self._xbrl_extension)):
+                os.path.isdir(self._xbrl_extension)):
 
             shutil.rmtree(self._xbrl_extension)
 
