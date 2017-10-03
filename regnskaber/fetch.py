@@ -33,6 +33,8 @@ from dabai.data_parsing.regnskabs_parsing.regnskab_inserter import (
 
 from dabai.setup import get_orm as setup_get_orm
 
+ERASE = '\r\x1B[K'
+
 ENCODING = 'UTF-8'
 
 csv.field_size_limit(2**31-1)
@@ -614,9 +616,6 @@ def producer_scan(search_result, queue):
     return n
 
 
-ERASE = '\r\x1B[K'
-
-
 def fetch_to_db(process_count=4,
                 from_date=datetime(2011, 1, 1)):
 
@@ -654,47 +653,3 @@ def fetch_to_db(process_count=4,
             print("One joined")
         print("All joined")
     return
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=(
-        'Fetches xbrls and inserts them into the database in parallel. '
-        'Only regnskaber after the date given are fetched.'))
-
-    parser.add_argument('-f', '--from-date',
-                        dest='from_date',
-                        help='From date on the form: YYYY-mm-dd[THH:MM:SS].',
-                        required=True)
-
-    parser.add_argument('-p', '--processes',
-                        dest='processes',
-                        help=('The number of parallel jobs to start.'),
-                        default=1)
-
-    parser.add_argument('--no-create-tables',
-                        dest='create_tables',
-                        action='store_const',
-                        const=False,
-                        default=True)
-
-    args = parser.parse_args()
-
-    if args.create_tables:
-        print("Creating tables...")
-        setup_tables()
-        print("Done.")
-
-    try:
-        if len(args.from_date) > len('YYYY-mm-dd'):
-            from_date = datetime.strptime(args.from_date, '%Y-%m-%dT%H:%M:%S')
-        else:
-            from_date = datetime.strptime(args.from_date, '%Y-%m-%d')
-
-        processes = int(args.processes)
-
-        producer_scan(process_count=processes,
-                      from_date=from_date)
-
-    except ValueError:
-        print('Invalid date format or number of processes.')
-        sys.exit(1)
