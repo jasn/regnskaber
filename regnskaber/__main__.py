@@ -1,56 +1,24 @@
 import argparse
 from collections import OrderedDict
-import configparser
 import datetime
 import os
 
 from pathlib import Path
 
-#from . import fetch
-config_fields = ['host', 'port', 'user', 'pass', 'database']
-config_path = Path(__file__).parent / 'config.ini'
-
-def configure_connection():
-    print('No configuration file found.')
-    print('Please enter the database connection information below')
-    config_values = OrderedDict(
-        (f, input(f + ': ')) for f in config_fields
-    )
-    config_values = dict(Global=config_values)
-    config = configparser.ConfigParser()
-    config.read_dict(config_values)
-    with open(config_path, 'w') as fp:
-        config.write(fp)
-    return
-
-def ensure_config_exists():
-    if not config_path.exists():
-        configure_connection()
-
-def read_config():
-    ensure_config_exists()
-    config = configparser.ConfigParser()
-    with open(config_path) as fp:
-        config.read_file(fp)
-        actual_config_fields = config['Global'].keys()
-        missing = set(config_fields) - actual_config_fields
-        if missing:
-            print('The configuration file (%s) is invalid. ' % config_path +
-                  'Missing fields %s' % (', '.join(map(repr, missing))))
-            raise Exception
-        return config
+from . import read_config, interactive_ensure_config_exists
 
 class Commands:
-
     @staticmethod
     def fetch(from_date, processes, create_tables, **general_options):
-        configurations = read_config()
+        interactive_ensure_config_exists()
+        # setup engine and Session.
         #fetch.producer_scan(processes, from_date)
         pass
 
     @staticmethod
     def transform(bar, **general_options):
-        configurations = read_config()
+        interactive_ensure_config_exists()
+        # setup engine and Session.
         pass
 
 def parse_date(datestr):

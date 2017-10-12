@@ -290,10 +290,10 @@ class Regnskab(object):
         ifrs.xsd_basedir = basedir
         # assume extension has been downloaded and extracted.
         for file_path in ifrs.iter_files(self._xbrl_extension):
-            with closing(open(file_path, encoding=ENCODING)) as input_file:
+            with open(file_path, encoding=ENCODING) as input_file:
                 processed_document = ifrs.replace_xsd_href(input_file.read())
 
-            with closing(open(file_path, 'w', encoding=ENCODING)) as output_file:
+            with open(file_path, 'w', encoding=ENCODING) as output_file:
                 output_file.write(processed_document)
         return
 
