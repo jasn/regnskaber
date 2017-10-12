@@ -1,6 +1,7 @@
 import argparse
 
 import csv
+import functools
 import os
 import re
 import shutil
@@ -10,10 +11,9 @@ import time
 import zipfile
 
 from contextlib import redirect_stdout, closing
-from datetime import datetime
-from datetime import timedelta
+from datetime import timedelta, datetime
 from io import BytesIO, StringIO
-from multiprocessing import SimpleQueue, Process
+from multiprocessing import SimpleQueue, Process, Queue
 
 import elasticsearch1
 import requests
@@ -24,42 +24,25 @@ from elasticsearch1_dsl import Search
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.sql import func, select
 
-import dabai.data_parsing.regnskabs_parsing.fix_ifrs_extensions as ifrs
+from . import fix_ifrs_extensions as ifrs
 from arelle import Cntlr, ModelManager, ViewFileFactList, FileSource
-from dabai.data_parsing.regnskabs_parsing.unitrefs import UnitHandler
-from dabai.data_parsing.regnskabs_parsing.regnskab_inserter import (
-    get_connection, get_orm, drive_regnskab
-)
+from .unitrefs import UnitHandler
+from .regnskab_inserter import drive_regnskab
 
-from dabai.setup import get_orm as setup_get_orm
+from . import Session, engine
+from .models import Regnskaber, RegnskaberFiles, Base
+
+#from .setup import get_orm as setup_get_orm
 
 ERASE = '\r\x1B[K'
-
+ERASE = '\n'
 ENCODING = 'UTF-8'
 
 csv.field_size_limit(2**31-1)
 
 
 def setup_tables():
-    """
-    Performed after reading command line parameters.
-    """
-    orm, session = setup_get_orm(None)
-    # connection = get_connection()
-    root = os.path.dirname(os.path.abspath(__file__))
-    table_filename = os.path.join(root, 'tables.sql')
-    with open(table_filename, encoding=ENCODING) as table_file:
-        contents = table_file.read()
-        statements = contents.split(';')[:-1]
-        for statement in statements:
-            try:
-                # connection.execute(statement)
-                # engine.execute(statement)
-                session.execute(statement)
-            except OperationalError:  # table already exists.
-                continue
-    #connection.close()
-    session.commit()
+    Base.metadata.create_all(engine)
     return
 
 
@@ -411,6 +394,7 @@ class Regnskab(object):
                       file=o)
 
     def _log_missing_extension(self):
+        raise NotImplementedError
         self._print_error_msg('Error: No xsd href found in this file.\n')
         try:
             values = {
@@ -420,6 +404,7 @@ class Regnskab(object):
                 'offentliggoerelsesTidspunkt': self.offentliggoerelsesTidspunkt,
                 'cvr': self.cvrnummer
             }
+
             with closing(get_connection()) as conn:
                 _orm = get_orm()
                 statement = _orm.regnskaber_errors.insert()
@@ -526,15 +511,18 @@ def insert_by_erst_id(erst_id, aarl=None, unit_handler=None):
 
 
 def erst_id_present(erst_id):
-    _orm = get_orm()
-    with closing(get_connection()) as conn:
-        statement = select([func.count(_orm.regnskaber_files.c.erst_id)])\
-            .where(_orm.regnskaber_files.c.erst_id == erst_id)
-        count = conn.execute(statement).scalar()
-        return count > 0
+    session = Session()
+    try:
+        erst_id_found = session.query(RegnskaberFiles.erst_id).filter(
+            RegnskaberFiles.erst_id == erst_id
+        ).first()
+        return erst_id_found != None
+    finally:
+        session.close()
 
 
 def get_regnskabsid_by_erst_id(erst_id):
+    raise NotImplementedError
     _orm = get_orm()
     with closing(get_connection()) as conn:
         statement = select([_orm.regnskaber_files.c.regnskabsId])\
@@ -544,6 +532,7 @@ def get_regnskabsid_by_erst_id(erst_id):
 
 
 def error_elastic_cvr_none(erst_id, offentliggoerelsesTidspunkt):
+    raise NotImplementedError
     values = {
         'regnskabsId': get_regnskabsid_by_erst_id(erst_id),
         'reason': 'cvr in elastic search was None',
@@ -558,11 +547,11 @@ def error_elastic_cvr_none(erst_id, offentliggoerelsesTidspunkt):
 
 
 def consumer_insert(queue, aarl=None, unit_handler=None):
+    engine.dispose()  # for multiprocessing.
     if aarl is None:
         aarl = AArlCollection()
     if unit_handler is None:
         unit_handler = UnitHandler()
-
     while True:
         msg = queue.get()
         if isinstance(msg, str) and msg == 'DONE':
@@ -576,10 +565,11 @@ def consumer_insert(queue, aarl=None, unit_handler=None):
             if cvrnummer is None:
                 error_elastic_cvr_none(erst_id, offentliggoerelsesTidspunkt)
         except RuntimeError as e:
-            print(e)
+            print(e, file=sys.stderr)
     return
 
 def producer_scan(search_result, queue):
+    n = 0
     for document in search_result.scan():
         erst_id = document.meta.id
         cvrnummer = document['cvrNummer']
@@ -612,12 +602,13 @@ def producer_scan(search_result, queue):
                    xbrl_extension_url, erst_id, indlaesningsTidspunkt)
             queue.put(msg)
             n += 1
-            print(ERASE + 'Fetching search results: ?/%s' % n, end='', flush=True)
+            print(ERASE, end='', flush=True)
+            print('Fetching search results: ?/%s' % n, end='', flush=True)
     return n
 
 
-def fetch_to_db(process_count=4,
-                from_date=datetime(2011, 1, 1)):
+def fetch_to_db(process_count=1, from_date=datetime(2011, 1, 1)):
+    setup_tables()
 
     with AArlCollection() as aarl:
 
@@ -628,7 +619,8 @@ def fetch_to_db(process_count=4,
         s = s.filter('range', offentliggoerelsesTidspunkt={'gte': from_date})
         s = s.sort('offentliggoerelsesTidspunkt')
 
-        queue = SimpleQueue()
+        #queue = SimpleQueue(1000)
+        queue = Queue(10000)
         consumer_partial = functools.partial(consumer_insert, aarl=aarl, unit_handler=unit_handler)
 
         processes = [Process(target=consumer_partial,
@@ -636,7 +628,7 @@ def fetch_to_db(process_count=4,
                              daemon=True) for _ in range(process_count)]
         for p in processes:
             p.start()
-
+        engine.dispose()  # for multiprocessing.
         n = producer_scan(s, queue)
 
         for end in range(process_count):

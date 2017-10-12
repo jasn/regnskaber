@@ -5,14 +5,16 @@ import os
 
 from pathlib import Path
 
-from . import read_config, interactive_ensure_config_exists
+from . import read_config, interactive_ensure_config_exists, setup_database_connection
+from . import fetch
 
 class Commands:
     @staticmethod
     def fetch(from_date, processes, create_tables, **general_options):
         interactive_ensure_config_exists()
         # setup engine and Session.
-        #fetch.producer_scan(processes, from_date)
+        setup_database_connection()
+        fetch.fetch_to_db(processes, from_date)
         pass
 
     @staticmethod
@@ -31,13 +33,15 @@ def parse_date(datestr):
 parser = argparse.ArgumentParser()
 
 subparsers = parser.add_subparsers(dest='command')
+subparsers.required = True
 
 parser_fetch = subparsers.add_parser('fetch', help='fetch from erst')
 parser_fetch.add_argument('-f', '--from-date',
                           dest='from_date',
                           help='From date on the form: YYYY-mm-dd[THH:MM:SS].',
                           type=parse_date,
-                          required=True)
+                          default=datetime.datetime(2011, 1, 1),
+                          required=False)
 
 parser_fetch.add_argument('-p', '--processes',
                           dest='processes',
@@ -53,7 +57,6 @@ parser_fetch.add_argument('--no-create-tables',
                           default=True)
 
 parser_transform = subparsers.add_parser('transform', help='build useful tables from data fetched from erst')
-parser_transform.add_argument('--bar', type=str, default='321')
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())

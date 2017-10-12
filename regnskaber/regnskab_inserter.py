@@ -7,8 +7,8 @@ import pathlib
 import configparser
 import os
 import csv
-from dabai.setup import get_engine, load_tables
-
+#from .setup import get_engine, load_tables
+from . import engine
 
 _engine = None
 _orm = None
