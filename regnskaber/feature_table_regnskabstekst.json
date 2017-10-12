@@ -1,0 +1,804 @@
+[
+  {
+    "tablename": "regnskabstekst",
+    "columns": [
+      {
+        "name": "arr_AuditorsReportOnReviewOfFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AuditorsReportOnReviewOfFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_IndependentAuditorsReportsReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:IndependentAuditorsReportsReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AddresseeOfAuditorsReportOnReviewOfFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AddresseeOfAuditorsReportOnReviewOfFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_IdentificationOfReviewedFinancialStatement",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:IdentificationOfReviewedFinancialStatement",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOnManagementsResponsibilityiewOfFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOnManagementsResponsibilityAuditorsReportOnReviewOfFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOfAuditorsResponsibilityForReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOfAuditorsResponsibilityForReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOnReviewPerformed",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOnReviewPerformed",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_DescriptionsOfQualificationsOfReviewedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:DescriptionsOfQualificationsOfReviewedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OpinionOnReviewedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OpinionOnReviewedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SupplementaryInformationOnAuditorsReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SupplementaryInformationOnAuditorsReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AuditorsReportsAccordingToOtherLegisationAndRegulationReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AuditorsReportsAccordingToOtherLegislationAndRegulationReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOnManagementsReviewAuditorsiewOfFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOnManagementsReviewAuditorsReportOnReviewOfFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OtherReportsReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OtherReportsReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AuditorsReportOnAuditedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AuditorsReportOnAuditedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_IndependentAuditorsReportsAudit",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:IndependentAuditorsReportsAudit",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AddresseeOfAuditorsReportOnAuditedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AddresseeOfAuditorsReportOnAuditedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AuditorsReportOnFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AuditorsReportOnFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_IdentificationOfAuditedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:IdentificationOfAuditedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOfExecutiveAndSupervisoryBotyForFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOfExecutiveAndSupervisoryBoardsResponsibilityForFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text",
+          "when_multiple": "concatenate"
+        }
+      },
+      {
+        "name": "arr_StatementOfAuditorsResponsibilityForAuditAndAuditPerformed",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOfAuditorsResponsibilityForAuditAndAuditPerformed",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_DescriptionOfQualificationsOfAuditedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:DescriptionOfQualificationsOfAuditedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text",
+          "when_multiple": "concatenate"
+        }
+      },
+      {
+        "name": "arr_TypeOfBasisForModifiedOpinionOnAuditedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:TypeOfBasisForModifiedOpinionOnAuditedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OpinionOnAuditedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OpinionOnAuditedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text",
+          "when_multiple": "concatenate"
+        }
+      },
+      {
+        "name": "arr_TypeOfModifiedOpinionOnAuditedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:TypeOfModifiedOpinionOnAuditedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementWhetherQualificationsOfAudiproveFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementWhetherQualificationsOfAuditedFinancialStatementsAreOfSuchDecisiveImportanceThatAnnualGeneralMeetingShouldNotApproveFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SupplementaryInformationOnMattersPeruditedFinancialStatement",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SupplementaryInformationOnMattersPertainingToAuditedFinancialStatement",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SupplementaryInformationOnAudit",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SupplementaryInformationOnAudit",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AuditorsReportsAccordingToOtherLegislationAndRegulation",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AuditorsReportsAccordingToOtherLegislationAndRegulation",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SupplementaryInformationOnOtherMatters",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SupplementaryInformationOnOtherMatters",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOnManagementsReviewAuditorsditedFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOnManagementsReviewAuditorsReportOnAuditedFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OtherReportsAuditorsReport",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OtherReportsAuditorsReport",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AuditorsReportOnExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AuditorsReportOnExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_IndependentAuditorsReportsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:IndependentAuditorsReportsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AddresseeOfAuditorsReportOnExtendedRiewOfFinancialStatements",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AddresseeOfAuditorsReportOnExtendedReviewOfFinancialStatements",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text",
+          "when_multiple": "concatenate"
+        }
+      },
+      {
+        "name": "arr_IdentificationOfFinancialStatementsAStatementsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:IdentificationOfFinancialStatementsAndDescriptionOfFinancialReportingFrameworkAppliedInPreparationOfFinancialStatementsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOfExecutiveAndSupervisoryBoStatementsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOfExecutiveAndSupervisoryBoardsResponsibilityForFinancialStatementsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOfAuditorsResponsibilityExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOfAuditorsResponsibilityExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_DescriptionOfQualificationsOfFinanciStatementsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:DescriptionOfQualificationsOfFinancialStatementsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_TypeOfBasisForModifiedOpinionOnFinanStatementsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:TypeOfBasisForModifiedOpinionOnFinancialStatementsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OpinionOnFinancialStatementsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OpinionOnFinancialStatementsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_TypeOfModifiedOpinionOnAuditedFinancStatementsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:TypeOfModifiedOpinionOnAuditedFinancialStatementsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementWhetherQualificationsOfFinaStatementsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementWhetherQualificationsOfFinancialStatementsAreOfSuchDecisiveImportanceThatAnnualGeneralMeetingShouldNotApproveFinancialStatementsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SupplementaryInformationOnMattersPerlStatementExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SupplementaryInformationOnMattersPertainingToFinancialStatementExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SupplementaryInformationOnExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SupplementaryInformationOnExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AuditorsReportsAccordingToOtherLegisRegulationExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AuditorsReportsAccordingToOtherLegislationAndRegulationExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SupplementaryInformationOnOtherMattersExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SupplementaryInformationOnOtherMattersExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOnManagementsReviewAuditorsStatementsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOnManagementsReviewAuditorsReportOnExtendedReviewFinancialStatementsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OtherReportsExtendedReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OtherReportsExtendedReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OtherAssuranceReports",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OtherAssuranceReports",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_IndependentAuditorsReportsOtherAssuranceReports",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:IndependentAuditorsReportsOtherAssuranceReports",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AddresseeOfAuditorsReportOnOtherAssuranceReports",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AddresseeOfAuditorsReportOnOtherAssuranceReports",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_IdentificationOfMattersOnWhichAssuraionOfAssuranceEngagement",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:IdentificationOfMattersOnWhichAssuranceReportIsProvidedAndDescriptionOfAssuranceEngagement",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOnManagementsResponsibilityOtherAssuranceReports",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOnManagementsResponsibilityOtherAssuranceReports",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_StatementOfAuditorsResponsibilityOtherAssuranceReports",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:StatementOfAuditorsResponsibilityOtherAssuranceReports",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_DescriptionOfQualificationsOfAssuranceEngagementPerformed",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:DescriptionOfQualificationsOfAssuranceEngagementPerformed",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OpinionOnSubjectMatterOfAssuranceReport",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OpinionOnSubjectMatterOfAssuranceReport",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SupplementaryInformationOnAssurance",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SupplementaryInformationOnAssurance",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_OtherReports",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:OtherReports",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AuditorsReportsOtherReports",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AuditorsReportsOtherReports",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_AddresseeOfAuditorsReportOnOtherReport",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:AddresseeOfAuditorsReportOnOtherReport",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_DescriptionOfOtherEngagement",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:DescriptionOfOtherEngagement",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_InformationOnSignatureOfAuditors",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:InformationOnSignatureOfAuditors",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SignatureOfAuditorsPlace",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SignatureOfAuditorsPlace",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "arr_SignatureOfAuditorsDate",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "arr:SignatureOfAuditorsDate",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "cmn_DescriptionOfAuditor",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "cmn:DescriptionOfAuditor",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "cmn_IdentificationNumberCvrOfAuditFirm",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "cmn:IdentificationNumberCvrOfAuditFirm",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "cmn_NameAndSurnameOfAuditor",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "cmn:NameAndSurnameOfAuditor",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "cmn_NameOfAuditFirm",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "cmn:NameOfAuditFirm",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "cmn_TypeOfAuditorAssistance",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "cmn:TypeOfAuditorAssistance",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "fsa_ClassOfReportingEntity",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "fsa:ClassOfReportingEntity",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "fsa_InformationOnRelatedEntities",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "fsa:InformationOnRelatedEntities",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "fsa_InformationOnReportingClassOfEntity",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "fsa:InformationOnReportingClassOfEntity",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "gsd_IdentificationNumberCvrOfReportingEntity",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "gsd:IdentificationNumberCvrOfReportingEntity",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "gsd_IdentificationNumberCvrOfSubmittingEnterprise",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "gsd:IdentificationNumberCvrOfSubmittingEnterprise",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "gsd_InformationOnTypeOfSubmittedReport",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "gsd:InformationOnTypeOfSubmittedReport",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "gsd_NameOfSubmittingEnterprise",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "gsd:NameOfSubmittingEnterprise",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "gsd_RegisteredOfficeOfReportingEntity",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "gsd:RegisteredOfficeOfReportingEntity",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "gsd_ReportingPeriodStartDate",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "gsd:ReportingPeriodStartDate",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "mrv_DescriptionOfDevelopmentInActivitiesAndFinancialAffairs",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "mrv:DescriptionOfDevelopmentInActivitiesAndFinancialAffairs",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "mrv_DescriptionOfPrimaryActivitiesOfEntity",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "mrv:DescriptionOfPrimaryActivitiesOfEntity",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text",
+          "when_multiple": "concatenate"
+        }
+      },
+      {
+        "name": "mrv_DescriptionOfSignificantEventsOccurrfterEndOfReportingPeriod",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "mrv:DescriptionOfSignificantEventsOccurringAfterEndOfReportingPeriod",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "mrv_ManagementsReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "mrv:ManagementsReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "sob_ConfirmationThatAnnualReportIsPresenAssociationOrByAgreement",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "sob:ConfirmationThatAnnualReportIsPresentedInAccordanceWithRequirementsProvidedForByLegislationAnyStandardsAndRequirementsProvidedByArticlesOfAssociationOrByAgreement",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "sob_ConfirmationThatFinancialStatementGiancialPositionAndResults",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "sob:ConfirmationThatFinancialStatementGivesTrueAndFairViewOfAssetsLiabilitiesEquityFinancialPositionAndResults",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "sob_IdentificationOfApprovedAnnualReport",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "sob:IdentificationOfApprovedAnnualReport",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "sob_ManagementsStatementAboutManagementsReview",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "sob:ManagementsStatementAboutManagementsReview",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "sob_RecommendationForApprovalOfAnnualReportByGeneralMeeting",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "sob:RecommendationForApprovalOfAnnualReportByGeneralMeeting",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      },
+      {
+        "name": "sob_StatementByExecutiveAndSupervisoryBoards",
+        "sqltype": "Text(2147483648)",
+        "regnskabs_fieldname": "sob:StatementByExecutiveAndSupervisoryBoards",
+        "dimensions": null,
+        "method": {
+          "name": "generic_text"
+        }
+      }
+    ]
+  }
+]

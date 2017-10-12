@@ -1,0 +1,718 @@
+[
+  {
+    "tablename": "regnskabstal",
+    "columns": [
+      {
+        "name": "fsa_AccumulatedImpairmentLossesAndDeprecropertyPlantAndEquipment",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:AccumulatedImpairmentLossesAndDepreciationOfPropertyPlantAndEquipment",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_AccumulatedRevaluationsOfInvestments",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:AccumulatedRevaluationsOfInvestments",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_Assets",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:Assets",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_CashAndCashEquivalents",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:CashAndCashEquivalents",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ContributedCapital",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ContributedCapital",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_CostOfSales",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:CostOfSales",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_CurrentAssets",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:CurrentAssets",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_CurrentDeferredTaxAssets",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:CurrentDeferredTaxAssets",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_CurrentTaxExpense",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:CurrentTaxExpense",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_DeferredIncomeAssets",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:DeferredIncomeAssets",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_DepreciationAmortisationExpenseAndImRecognisedInProfitOrLoss",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:DepreciationAmortisationExpenseAndImpairmentLossesOfPropertyPlantAndEquipmentAndIntangibleAssetsRecognisedInProfitOrLoss",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_DepreciationOfPropertyPlantAndEquipment",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:DepreciationOfPropertyPlantAndEquipment",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_EmployeeBenefitsExpense",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:EmployeeBenefitsExpense",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_Equity",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:Equity",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_FixturesFittingsToolsAndEquipment",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:FixturesFittingsToolsAndEquipment",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_GrossProfitLoss",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:GrossProfitLoss",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_GrossResult",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:GrossResult",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_Inventories",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:Inventories",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_InvestmentsGross",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:InvestmentsGross",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_LandAndBuildings",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:LandAndBuildings",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_LiabilitiesAndEquity",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:LiabilitiesAndEquity",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_LiabilitiesOtherThanProvisions",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:LiabilitiesOtherThanProvisions",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_LongtermInvestmentsAndReceivables",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:LongtermInvestmentsAndReceivables",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_LongtermInvestmentsInAssociates",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:LongtermInvestmentsInAssociates",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_LongtermInvestmentsInGroupEnterprises",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:LongtermInvestmentsInGroupEnterprises",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_LongtermLiabilitiesOtherThanProvisions",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:LongtermLiabilitiesOtherThanProvisions",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_NoncurrentAssets",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:NoncurrentAssets",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherInterestExpenses",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherInterestExpenses",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherExternalExpenses",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherExternalExpenses",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherFinanceExpenses",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherFinanceExpenses",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherFinanceIncome",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherFinanceIncome",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherReserves",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherReserves",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherShorttermInvestments",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherShorttermInvestments",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherShorttermPayables",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherShorttermPayables",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherShorttermReceivables",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherShorttermReceivables",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ProfitLoss",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ProfitLossFromOrdinaryActivitiesBeforeTax",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLossFromOrdinaryActivitiesBeforeTax",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ProfitLossFromOrdinaryOperatingActivities",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLossFromOrdinaryOperatingActivities",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_PropertyPlantAndEquipment",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:PropertyPlantAndEquipment",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_PropertyPlantAndEquipmentGross",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:PropertyPlantAndEquipmentGross",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ProposedDividendRecognisedInEquity",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProposedDividendRecognisedInEquity",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_Provisions",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:Provisions",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ProvisionsForDeferredTax",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProvisionsForDeferredTax",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ReserveForNetRevaluationAccordingToEquityMethod",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ReserveForNetRevaluationAccordingToEquityMethod",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_RestOfOtherFinanceExpenses",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:RestOfOtherFinanceExpenses",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_RetainedEarnings",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:RetainedEarnings",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_RevaluationReserve",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:RevaluationReserve",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_Revenue",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:Revenue",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_SharePremium",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:SharePremium",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermDebtToBanks",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermDebtToBanks",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermInvestments",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermInvestments",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermLiabilitiesOtherThanProvisions",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermLiabilitiesOtherThanProvisions",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermPayablesToGroupEnterprises",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermPayablesToGroupEnterprises",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermPayablesToShareholdersAndManagement",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermPayablesToShareholdersAndManagement",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermReceivables",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermReceivables",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermReceivablesFromGroupEnterprises",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermReceivablesFromGroupEnterprises",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermTaxPayables",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermTaxPayables",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermTaxReceivables",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermTaxReceivables",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermTradePayables",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermTradePayables",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_ShorttermTradeReceivables",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ShorttermTradeReceivables",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_SocialSecurityContributions",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:SocialSecurityContributions",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_TaxExpense",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:TaxExpense",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_TaxExpenseOnOrdinaryActivities",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:TaxExpenseOnOrdinaryActivities",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_WagesAndSalaries",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:WagesAndSalaries",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_retained_earnings",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:RetainedEarningsMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ProposedDividendRecognisedInEquity",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ProposedDividendRecognisedInEquityMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ReserveForNetRevaluationAccordingToEquity",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ReserveForNetRevaluationAccordingToEquityMethodMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ProposedDividendRecognisedInLiabilities",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ProposedDividendRecognisedInLiabilitiesMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ProposedExtraordinaryDividendRecognisedInEq",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ProposedExtraordinaryDividendRecognisedInEquityMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ProposedExtraordinaryDividendRecognInLiabilit",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ProposedExtraordinaryDividendRecognisedInLiabilitiesMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_Distributions",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:DistributionsMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_RestOfOtherReserves",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:RestOfOtherReservesMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_OtherStatutoryReserves",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:OtherStatutoryReservesMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ReserveForNetRevaluationOfInvestmentAssets",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ReserveForNetRevaluationOfInvestmentAssetsMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_TransferredFromToReserveFund",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:TransferredFromToReserveFundMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_TransferredFromToReservesAvailable",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:TransferredFromToReservesAvailableMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ReserveAccordingToArticlesOfAssociation",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ReserveAccordingToArticlesOfAssociationMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_TransferredToReserveForEntrepreneurialCompany",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:TransferredToReserveForEntrepreneurialCompanyMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_TransferredFromToHedgeFundMember",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss",
+        "dimensions": ["fsa:ResultDistributionDimension", "fsa:TransferredFromToHedgeFundMember"],
+        "method": {
+          "name": "generic_number"
+        }
+      }
+    ]
+  }
+]
