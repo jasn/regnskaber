@@ -1,0 +1,7 @@
+[Global]
+host = localhost
+user = your_user
+port = 3306
+passwd = your_pass
+charset = utf8
+database = erhvervsdata
