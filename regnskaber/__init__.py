@@ -1,4 +1,5 @@
 import configparser
+import datetime
 
 from pathlib import Path
 
@@ -6,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from collections import OrderedDict
+
 
 config_path = Path(__file__).parent / 'config.ini'
 
@@ -95,3 +97,11 @@ def setup_database_connection():
     connection_url = connection_url.format(**config['Global'])
     _engine = create_engine(connection_url, encoding='utf8')
     _session = sessionmaker(bind=engine)
+
+
+def parse_date(datestr):
+    try:
+        return datetime.datetime.strptime(datestr, '%Y-%m-%dT%H:%M:%S')
+    except ValueError:
+        return datetime.datetime.strptime(datestr, '%Y-%m-%d')
+

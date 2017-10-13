@@ -3,52 +3,29 @@ database via sqlalchemy for the regnskab parsing script, as well as actually
 inserting each 'regnskab'.
 """
 
-import pathlib
+
 import configparser
-import os
 import csv
+import datetime
+import os
+import pathlib
+import sys
+
+from sqlalchemy.exc import SQLAlchemyError, DBAPIError
+
 #from .setup import get_engine, load_tables
-from . import engine
-
-_engine = None
-_orm = None
-
-def setup_db():
-    global _engine, _orm
-    if _engine is None:
-        _engine = get_engine(None)
-    if _orm is None:
-        _orm = load_tables(_engine)
-    return
-
-
-def get_connection():
-    setup_db()
-    return _engine.connect()
-
-def get_orm():
-    setup_db()
-    return _orm
-
+from . import engine, Session
+from .models import FinancialStatement, FinancialStatementEntry
 
 def initialize_regnskab(regnskab):
-    """Creates a row in the regnskaber_files table
-
-    Arguments:
-    regnskab -- Regnskab object representing the regnskab to create a row for
-    """
-
-    conn = _engine.connect()
-    offentlig_dato = str(regnskab.offentliggoerelsesTidspunkt)[:19]
-    result = conn.execute(_orm.regnskaber_files.insert(),
-                          offentliggoerelsesTidspunkt=offentlig_dato,
-                          cvrnummer=regnskab.cvrnummer,
-                          regnskabsForm=regnskab.regnskabsForm,
-                          erst_id=regnskab._erst_id,
-                          indlaesningsTidspunkt=regnskab.indlaesningsTidspunkt)
-    inserted_id = result.inserted_primary_key[0]
-    conn.close()
-    return inserted_id
+    regnskaber_file = FinancialStatement(
+        offentliggoerelsesTidspunkt=regnskab.offentliggoerelsesTidspunkt,
+        indlaesningsTidspunkt=regnskab.indlaesningsTidspunkt,
+        cvrnummer=regnskab.cvrnummer,
+        regnskabsForm=regnskab.regnskabsForm,
+        erst_id=regnskab.erst_id
+    )
+    return regnskaber_file
 
 
 def cvr_parse(regnskabsId, _input):
@@ -73,46 +50,73 @@ cvr_parse.last_invalid_regnskabsId = None
 
 
 def insert_regnskab(f, xml_unit_map, regnskab):
-    regnskabsId = initialize_regnskab(regnskab)
-    assert(regnskabsId != 0)
+    session = Session()
+    try:
+        regnskaber_file = initialize_regnskab(regnskab)
+        session.add(regnskaber_file)
+        rows = []
+        csv_dict_reader = csv.DictReader(f)
+        for row in csv_dict_reader:
+            for key in row:
+                if key and row[key]:
+                    row[key] = row[key].strip()
+                if key and not row[key]:
+                    row[key] = ''
 
-    rows = []
-    csv_reader = iter(csv.reader(f))
-    next(csv_reader)
-    for line in csv_reader:
-        line = [s.strip() for s in line]
-        unit_id_xbrl = (xml_unit_map[line[3].strip()][0]
-                            if line[3].strip() in xml_unit_map.keys() else '')
-        unit_name_xbrl = (xml_unit_map[line[3].strip()][1]
-                          if line[3].strip() in xml_unit_map.keys() else '')
+            # keys in row:
+            # Name,Value,contextRef,unitRef,Dec,Prec,Lang,EntityIdentifier,Start,End/Instant,Dimensions
+            row['Dimensions'] = ', '.join([row.pop('Dimensions', '')] + row.pop(None, []))
+            assert row.keys() == set("Name,Value,contextRef,unitRef,Dec,Prec,Lang,"
+                                     "EntityIdentifier,Start,End/Instant,Dimensions"
+                                     "".split(','))
 
-        rows.append({
-            'regnskabsId': regnskabsId,
-            'fieldName': line[0],
-            'fieldValue': line[1],
-            'contextRef': line[2],
-            'unitRef': line[3],
-            'decimals': line[4],
-            'precision': line[5],
-            'cvrnummer': cvr_parse(regnskabsId, line[7]),
-            'startDate': line[8] or line[9],
-            'endDate': line[9],
-            'dimensions': ', '.join(line[10:]),
-            'unitIdXbrl': unit_id_xbrl,
-            'unitNameXbrl': unit_name_xbrl
-        })
+            unit_id_xbrl = (xml_unit_map[row['unitRef']]['id']
+                                if row['unitRef'] in xml_unit_map.keys() else '')
+            unit_name_xbrl = (xml_unit_map[row['unitRef']]['name']
+                              if row['unitRef'] in xml_unit_map.keys() else '')
 
-    connection = _engine.connect()
-    connection.execute(_orm.regnskaber.insert(), rows)
-    connection.close()
+            try:
+                row['EntityIdentifier'] = int(row['EntityIdentifier'])
+            except ValueError:
+                row['EntityIdentifier'] = int(regnskaber_file.cvrnummer)
+
+            row['Start'] = datetime.datetime.strptime((row['Start'] or row['End/Instant']), '%Y-%m-%d')
+            row['End/Instant'] = datetime.datetime.strptime(row['End/Instant'], '%Y-%m-%d')
+
+            regnskaber_file.financial_statement_entries.append(
+                FinancialStatementEntry(
+                    fieldName=row['Name'], fieldValue=row['Value'],
+                    contextRef=row['contextRef'], unitRef=row['unitRef'],
+                    decimals=row['Dec'], precision=row['Prec'],
+                    cvrnummer=row['EntityIdentifier'],
+                    startDate=row['Start'], endDate=row['End/Instant'],
+                    dimensions=row['Dimensions'],
+                    unitIdXbrl=unit_id_xbrl, unitNameXbrl=unit_name_xbrl
+                )
+            )
+
+        session.commit()
+
+    except (DBAPIError, SQLAlchemyError):
+        session.rollback()
+        import traceback as tb
+        tb.print_exc()
+        raise RuntimeError('DBAPI error or SQLAlchemyError. erst_id = ' % regnskab.erst_id)
+    except Exception:
+        session.rollback()
+        import traceback as tb
+        tb.print_exc()
+        raise RuntimeError('Error in regnskab insertion. erst_id = %s' % regnskab.erst_id)
+    finally:
+        session.close()
     return
 
 
 def drive_regnskab(regnskab):
-    setup_db()
     filename = regnskab.xbrl_file.name + '.csv'
-    with open(filename, encoding='utf-8') as csv_file, open(filename + '_units', encoding='utf-8') as unit_file:
+    arelle_csv_encoding = 'utf-8-sig'
+    with open(filename, encoding=arelle_csv_encoding) as csv_file, open(filename + '_units', encoding='utf-8') as unit_file:
         csv_reader = csv.reader(unit_file)
-        unit_map = {row[0]: (row[1], row[2]) for row in csv_reader}
+        unit_map = {row[0]: {'id': row[1], 'name': row[2]} for row in csv_reader}
         insert_regnskab(csv_file, unit_map, regnskab)
 

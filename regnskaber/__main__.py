@@ -5,7 +5,9 @@ import os
 
 from pathlib import Path
 
-from . import read_config, interactive_ensure_config_exists, setup_database_connection
+from . import (read_config, interactive_ensure_config_exists,
+               setup_database_connection, parse_date)
+
 from . import fetch
 
 class Commands:
@@ -22,12 +24,6 @@ class Commands:
         interactive_ensure_config_exists()
         # setup engine and Session.
         pass
-
-def parse_date(datestr):
-    try:
-        return datetime.datetime.strptime(datestr, '%Y-%m-%dT%H:%M:%S')
-    except ValueError:
-        return datetime.datetime.strptime(datestr, '%Y-%m-%d')
 
 
 parser = argparse.ArgumentParser()

@@ -29,8 +29,8 @@ from arelle import Cntlr, ModelManager, ViewFileFactList, FileSource
 from .unitrefs import UnitHandler
 from .regnskab_inserter import drive_regnskab
 
-from . import Session, engine
-from .models import Regnskaber, RegnskaberFiles, Base
+from . import Session, engine, parse_date
+from .models import FinancialStatementEntry, FinancialStatement, Base
 
 #from .setup import get_orm as setup_get_orm
 
@@ -197,16 +197,16 @@ class ExtensionCollection(XSDCollection):
         self.find_xsds(extension_dir)
 
 
-class Regnskab(object):
+class InputRegnskab(object):
 
     def __init__(self, cvrnummer, offentliggoerelsesTidspunkt,
-                 xbrl_file, xbrl_extension, erst_id, indlaesningsTidspunkt):
+                 xbrl_file_url, xbrl_extension_url, erst_id, indlaesningsTidspunkt):
         self.cvrnummer = cvrnummer
-        self._erst_id = erst_id
+        self.erst_id = erst_id
         self.offentliggoerelsesTidspunkt = offentliggoerelsesTidspunkt
         self.indlaesningsTidspunkt = indlaesningsTidspunkt
-        self.xbrl_file = self._download_file(xbrl_file)
-        self._xbrl_extension = self._download_extension(xbrl_extension)
+        self.xbrl_file = self._download_file(xbrl_file_url)
+        self._xbrl_extension = self._download_extension(xbrl_extension_url)
 
     def __enter__(self):
         return self
@@ -400,7 +400,7 @@ class Regnskab(object):
             values = {
                 'regnskabsId': -1,
                 'reason': 'Missing extension (xsd) file.',
-                'erst_id': self._erst_id,
+                'erst_id': self.erst_id,
                 'offentliggoerelsesTidspunkt': self.offentliggoerelsesTidspunkt,
                 'cvr': self.cvrnummer
             }
@@ -422,7 +422,7 @@ class Regnskab(object):
                      '\terst_id: %s') % (
                          self.cvrnummer,
                          self.offentliggoerelsesTidspunkt,
-                         self._erst_id
+                         self.erst_id
                      )
         print(error_msg, file=sys.stderr)
 
@@ -453,9 +453,9 @@ def process(cvrnummer, offentliggoerelsesTidspunkt, xbrl_file, xbrl_extension,
     if erst_id_present(erst_id):
         return
     try:
-        with Regnskab(cvrnummer, offentliggoerelsesTidspunkt,
-                      xbrl_file, xbrl_extension, erst_id,
-                      indlaesningsTidspunkt) as regnskab:
+        with InputRegnskab(cvrnummer, offentliggoerelsesTidspunkt,
+                           xbrl_file, xbrl_extension, erst_id,
+                           indlaesningsTidspunkt) as regnskab:
             regnskab.output_namespaces()
             regnskab.output_units(unit_handler)
             regnskab.fix_extension(aarlcollection.tmp_dir)
@@ -481,14 +481,9 @@ def insert_by_erst_id(erst_id, aarl=None, unit_handler=None):
     res = query_by_erst_id(erst_id)
     hit = res[0]
     cvrnummer = hit['_source']['cvrNummer']
-    offentliggoerelsesTidspunkt = (
-        hit['_source']['offentliggoerelsesTidspunkt'][:10] + ' ' +
-        hit['_source']['offentliggoerelsesTidspunkt'][11:19]
-    )
-    indlaesningsTidspunkt = (
-        hit['_source']['indlaesningsTidspunkt'][:10] + ' ' +
-        hit['_source']['indlaesningsTidspunkt'][11:19]
-    )
+
+    offentliggoerelsesTidspunkt = parse_date(hit['_source']['offentliggoerelsesTidspunkt'][:19])
+    indlaesningsTidspunkt = parse_date(hit['_source']['indlaesningsTidspunkt'][:19])
 
     assert(erst_id == hit['_id'])
 
@@ -513,8 +508,8 @@ def insert_by_erst_id(erst_id, aarl=None, unit_handler=None):
 def erst_id_present(erst_id):
     session = Session()
     try:
-        erst_id_found = session.query(RegnskaberFiles.erst_id).filter(
-            RegnskaberFiles.erst_id == erst_id
+        erst_id_found = session.query(FinancialStatement.erst_id).filter(
+            FinancialStatement.erst_id == erst_id
         ).first()
         return erst_id_found != None
     finally:
@@ -576,14 +571,8 @@ def producer_scan(search_result, queue):
         # cvrnummer is possibly None, e.g. Greenland companies
 
         # date format: Y-m-dTH:M:s[Z+x]
-        offentliggoerelsesTidspunkt = (
-            document['offentliggoerelsesTidspunkt'][:10] + ' ' +
-            document['offentliggoerelsesTidspunkt'][11:19]
-        )
-        indlaesningsTidspunkt = (
-            document['indlaesningsTidspunkt'][:10] + ' ' +
-            document['indlaesningsTidspunkt'][11:19]
-        )
+        offentliggoerelsesTidspunkt = parse_date(document['offentliggoerelsesTidspunkt'][:19])
+        indlaesningsTidspunkt = parse_date(document['indlaesningsTidspunkt'][:19])
 
         dokumenter = document['dokumenter']
         xbrl_file_url = None
