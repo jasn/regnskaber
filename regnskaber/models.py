@@ -14,7 +14,7 @@ class FinancialStatement(Base):
     indlaesningsTidspunkt = Column(DateTime)
     cvrnummer = Column(BigInteger)
     regnskabsForm = Column(String(length=200))
-    erst_id = Column(String(length=100))
+    erst_id = Column(String(length=100), index=True, unique=True)
 
     financial_statement_entries = relationship(
         'FinancialStatementEntry',
