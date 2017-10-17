@@ -12,6 +12,7 @@ from contextlib import redirect_stdout
 from datetime import datetime
 from io import BytesIO, StringIO
 from multiprocessing import Process, Lock
+from pathlib import Path
 
 import elasticsearch1
 import requests
@@ -154,27 +155,23 @@ class XSDCollection(object):
 
 class AArlCollection(XSDCollection):
 
+    aarl_zip_location = Path(__file__).parent / 'resources' / 'aarl.zip'
+
     def __init__(self):
         super(AArlCollection, self).__init__()
 
-        self.url = 'http://cs.au.dk/~jasn/base.zip'
         self.tmp_dir = tempfile.mkdtemp()
-        self._download_aarl_zip()
+        self._unzip()
 
         self.find_xsds(self.tmp_dir)
 
-    def _download_aarl_zip(self):
-        failed_attempts = 0
-        while failed_attempts < 5:
-            try:
-                response = requests.get(self.url)
-                with zipfile.ZipFile(BytesIO(response.content)) as z:
-                    z.extractall(self.tmp_dir)
-                return
-            except requests.exceptions.RequestException:
-                failed_attempts += 1
-                time.sleep(30)
-        print("Fatal error. Cannot download aarl zip", file=sys.stderr)
+    def _unzip(self):
+        with open(AArlCollection.aarl_zip_location, 'rb') as aarl_zip:
+            z = zipfile.ZipFile(aarl_zip)
+            z.extractall(self.tmp_dir)
+            return
+        print("Fatal Error. Could not unzip aarl.zip. Exiting.",
+              file=sys.stderr)
         sys.exit(1)
 
     def __enter__(self):
@@ -530,10 +527,10 @@ def consumer_insert(queue, aarl=None, unit_handler=None, queue_lock=None):
             if queue.size() == 0:
                 do_sleep = True
                 continue
+            msg = queue.get()
             popped, pushed = queue.get_statistics()
             print(ERASE + 'Inserting into db: %s/%s' % (popped, pushed),
                   end='', flush=True)
-            msg = queue.get()
         finally:
             queue_lock.release()
             if do_sleep:
@@ -553,7 +550,7 @@ def consumer_insert(queue, aarl=None, unit_handler=None, queue_lock=None):
                     xbrl_extension_url, erst_id, indlaesningsTidspunkt,
                     aarl, unit_handler)
         except RuntimeError as e:
-            # should already have been logged elsewhere.
+            # already logged elsewhere.
             pass
     return
 
@@ -561,9 +558,9 @@ def consumer_insert(queue, aarl=None, unit_handler=None, queue_lock=None):
 def producer_scan(search_result, queue, queue_lock=None):
     cnt = 0
     for document in search_result.scan():
-        cnt += 1
-        if cnt == 10:
+        if cnt == 1000:
             return
+        cnt += 1
         erst_id = document.meta.id
         cvrnummer = document['cvrNummer']
         # cvrnummer is possibly None, e.g. Greenland companies
@@ -597,18 +594,22 @@ def producer_scan(search_result, queue, queue_lock=None):
     return
 
 
+def get_virk_search(from_date):
+    client = elasticsearch1.Elasticsearch('http://distribution.virk.dk:80',
+                                          timeout=300)
+    s = Search(using=client, index='offentliggoerelser')
+    s = s.filter('range', offentliggoerelsesTidspunkt={'gte': from_date})
+    s = s.sort('offentliggoerelsesTidspunkt')
+    return s
+
+
 def fetch_to_db(process_count=1, from_date=datetime(2011, 1, 1)):
     setup_tables()
 
     with AArlCollection() as aarl:
 
         unit_handler = UnitHandler()
-        client = elasticsearch1.Elasticsearch('http://distribution.virk.dk:80',
-                                              timeout=300)
-        s = Search(using=client, index='offentliggoerelser')
-        s = s.filter('range', offentliggoerelsesTidspunkt={'gte': from_date})
-        s = s.sort('offentliggoerelsesTidspunkt')
-
+        s = get_virk_search(from_date)
         try:
             tmp_file = tempfile.NamedTemporaryFile(delete=False)
             m = IOQueueManager()
