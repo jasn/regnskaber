@@ -1,5 +1,3 @@
-import argparse
-
 import csv
 import functools
 import os
@@ -10,10 +8,10 @@ import tempfile
 import time
 import zipfile
 
-from contextlib import redirect_stdout, closing
-from datetime import timedelta, datetime
+from contextlib import redirect_stdout
+from datetime import datetime
 from io import BytesIO, StringIO
-from multiprocessing import SimpleQueue, Process, Queue
+from multiprocessing import Process, Lock
 
 import elasticsearch1
 import requests
@@ -21,21 +19,17 @@ import requests
 from elasticsearch1 import Elasticsearch
 from elasticsearch1_dsl import Search
 
-from sqlalchemy.exc import OperationalError, SQLAlchemyError
-from sqlalchemy.sql import func, select
-
 from . import fix_ifrs_extensions as ifrs
+from .ioqueue import IOQueueManager
+
 from arelle import Cntlr, ModelManager, ViewFileFactList, FileSource
 from .unitrefs import UnitHandler
 from .regnskab_inserter import drive_regnskab
 
 from . import Session, engine, parse_date
-from .models import FinancialStatementEntry, FinancialStatement, Base
-
-#from .setup import get_orm as setup_get_orm
+from .models import FinancialStatement, Base
 
 ERASE = '\r\x1B[K'
-ERASE = '\n'
 ENCODING = 'UTF-8'
 
 csv.field_size_limit(2**31-1)
@@ -82,7 +76,7 @@ def fix_namespaces_in_csv(regnskab):
     output = StringIO()
     # assume that filename + '_namespaces' exists
     with open(filename + '_namespaces', encoding=ENCODING) as file_namespaces,\
-         open(filename, encoding=ENCODING) as f:
+            open(filename, encoding=ENCODING) as f:
 
         namespaces = {prefix: uri
                       for line in file_namespaces if line.find(':') != -1
@@ -157,6 +151,7 @@ class XSDCollection(object):
 
     pass
 
+
 class AArlCollection(XSDCollection):
 
     def __init__(self):
@@ -190,6 +185,7 @@ class AArlCollection(XSDCollection):
             shutil.rmtree(self.tmp_dir)
         return
 
+
 class ExtensionCollection(XSDCollection):
 
     def __init__(self, extension_dir):
@@ -200,7 +196,8 @@ class ExtensionCollection(XSDCollection):
 class InputRegnskab(object):
 
     def __init__(self, cvrnummer, offentliggoerelsesTidspunkt,
-                 xbrl_file_url, xbrl_extension_url, erst_id, indlaesningsTidspunkt):
+                 xbrl_file_url, xbrl_extension_url, erst_id,
+                 indlaesningsTidspunkt):
         self.cvrnummer = cvrnummer
         self.erst_id = erst_id
         self.offentliggoerelsesTidspunkt = offentliggoerelsesTidspunkt
@@ -226,7 +223,6 @@ class InputRegnskab(object):
                 os.path.isdir(self._xbrl_extension)):
 
             shutil.rmtree(self._xbrl_extension)
-
 
     def _download_extension(self, xbrl_extension_url):
         """
@@ -345,7 +341,8 @@ class InputRegnskab(object):
                 except (UnicodeDecodeError, UnicodeEncodeError):
                     document = document_raw
         if document is None:
-            error_msg = 'Error: could not fix encoding of the downloaded xbrl file\n'
+            error_msg = 'Error: could not fix encoding of '
+            error_msg += 'the downloaded xbrl file\n'
             self._print_error_msg(error_msg)
             return
 
@@ -362,7 +359,7 @@ class InputRegnskab(object):
         filename = self.xbrl_file.name
         outfilename = self.xbrl_file.name + '.csv_namespaces'
         with open(filename, encoding=ENCODING) as f,\
-             open(outfilename, 'w', encoding=ENCODING) as o:
+                open(outfilename, 'w', encoding=ENCODING) as o:
             contents = f.read()
             end = contents.find('xbrl')
             end = contents.find('>', end)
@@ -384,35 +381,27 @@ class InputRegnskab(object):
         outfilename = self.xbrl_file.name + '.csv_units'
 
         with open(self.xbrl_file.name, encoding=ENCODING) as f,\
-             open(outfilename, 'w', encoding=ENCODING) as o:
+                open(outfilename, 'w', encoding=ENCODING) as o:
             contents = f.read()
             xml_units = unit_handler.translate_units(contents)
-            for xml_unit_id, (xbrl_unit_id, xbrl_unit_name) in xml_units.items():
-                print('"%s","%s","%s"' % (xml_unit_id,
-                                          xbrl_unit_id,
-                                          xbrl_unit_name),
+            for xml_id, (xbrl_id, xbrl_name) in xml_units.items():
+                print('"%s","%s","%s"' % (xml_id,
+                                          xbrl_id,
+                                          xbrl_name),
                       file=o)
 
     def _log_missing_extension(self):
-        raise NotImplementedError
-        self._print_error_msg('Error: No xsd href found in this file.\n')
-        try:
-            values = {
-                'regnskabsId': -1,
-                'reason': 'Missing extension (xsd) file.',
-                'erst_id': self.erst_id,
-                'offentliggoerelsesTidspunkt': self.offentliggoerelsesTidspunkt,
-                'cvr': self.cvrnummer
-            }
-
-            with closing(get_connection()) as conn:
-                _orm = get_orm()
-                statement = _orm.regnskaber_errors.insert()
-                conn.execute(statement, values)
-        except SQLAlchemyError as e:
-            print('SQLAlchemyError error during _log_missing_extension',
-                  file=sys.stderr)
-            print(e, file=sys.stderr)
+        msg = ("[erst_id = %s] "
+               "[cvrnummer = %s] "
+               "[offentliggoerelsesTidspunkt: %s] "
+               "Error. XBRL extension missing."
+               ) % (
+                   self.erst_id,
+                   self.cvrnummer,
+                   self.offentliggoerelsesTidspunkt
+               )
+        print(msg, file=sys.stderr)
+        raise RuntimeError
         return
 
     def _print_error_msg(self, msg):
@@ -481,9 +470,12 @@ def insert_by_erst_id(erst_id, aarl=None, unit_handler=None):
     res = query_by_erst_id(erst_id)
     hit = res[0]
     cvrnummer = hit['_source']['cvrNummer']
+    offentliggoerelsesTidspunkt = hit['_source']['offentliggoerelsesTidspunkt']
+    offentliggoerelsesTidspunkt = offentliggoerelsesTidspunkt[:19]
+    offentliggoerelsesTidspunkt = parse_date(offentliggoerelsesTidspunkt)
 
-    offentliggoerelsesTidspunkt = parse_date(hit['_source']['offentliggoerelsesTidspunkt'][:19])
-    indlaesningsTidspunkt = parse_date(hit['_source']['indlaesningsTidspunkt'][:19])
+    indlaesningsTidspunkt = hit['_source']['indlaesningsTidspunkt'][:19]
+    indlaesningsTidspunkt = parse_date(indlaesningsTidspunkt)
 
     assert(erst_id == hit['_id'])
 
@@ -511,68 +503,75 @@ def erst_id_present(erst_id):
         erst_id_found = session.query(FinancialStatement.erst_id).filter(
             FinancialStatement.erst_id == erst_id
         ).first()
-        return erst_id_found != None
+        return erst_id_found is not None
     finally:
         session.close()
 
 
-def get_regnskabsid_by_erst_id(erst_id):
-    raise NotImplementedError
-    _orm = get_orm()
-    with closing(get_connection()) as conn:
-        statement = select([_orm.regnskaber_files.c.regnskabsId])\
-            .where(_orm.regnskaber_files.c.erst_id == erst_id)
-        regnskabsId = conn.execute(statement).scalar()
-        return regnskabsId
-
-
 def error_elastic_cvr_none(erst_id, offentliggoerelsesTidspunkt):
-    raise NotImplementedError
-    values = {
-        'regnskabsId': get_regnskabsid_by_erst_id(erst_id),
-        'reason': 'cvr in elastic search was None',
-        'erst_id': erst_id,
-        'offentliggoerelsesTidspunkt': offentliggoerelsesTidspunkt,
-        'cvr': None
-    }
-    _orm = get_orm()
-    with closing(get_connection()) as conn:
-        statement = _orm.regnskaber_errors.insert()
-        conn.execute(statement, values)
+    msg = ("[erst_id = %s] [offentliggoerelsesTidspunkt: %s] "
+           "Error: CVR-nummer returned by elasticsearch was None") % (
+               erst_id, offentliggoerelsesTidspunkt
+           )
+    print(msg, file=sys.stderr)
+    return
 
 
-def consumer_insert(queue, aarl=None, unit_handler=None):
+def consumer_insert(queue, aarl=None, unit_handler=None, queue_lock=None):
     engine.dispose()  # for multiprocessing.
     if aarl is None:
         aarl = AArlCollection()
     if unit_handler is None:
         unit_handler = UnitHandler()
     while True:
-        msg = queue.get()
+        do_sleep = False
+        try:
+            queue_lock.acquire()
+            if queue.size() == 0:
+                do_sleep = True
+                continue
+            popped, pushed = queue.get_statistics()
+            print(ERASE + 'Inserting into db: %s/%s' % (popped, pushed),
+                  end='', flush=True)
+            msg = queue.get()
+        finally:
+            queue_lock.release()
+            if do_sleep:
+                time.sleep(2)
+
         if isinstance(msg, str) and msg == 'DONE':
             break
         cvrnummer, offentliggoerelsesTidspunkt, xbrl_file_url = msg[:3]
         xbrl_extension_url, erst_id, indlaesningsTidspunkt = msg[3:]
+        offentliggoerelsesTidspunkt = parse_date(offentliggoerelsesTidspunkt)
+        indlaesningsTidspunkt = parse_date(indlaesningsTidspunkt)
         try:
+            if cvrnummer is None:
+                error_elastic_cvr_none(erst_id, offentliggoerelsesTidspunkt)
+                continue
             process(cvrnummer, offentliggoerelsesTidspunkt, xbrl_file_url,
                     xbrl_extension_url, erst_id, indlaesningsTidspunkt,
                     aarl, unit_handler)
-            if cvrnummer is None:
-                error_elastic_cvr_none(erst_id, offentliggoerelsesTidspunkt)
         except RuntimeError as e:
-            print(e, file=sys.stderr)
+            # should already have been logged elsewhere.
+            pass
     return
 
-def producer_scan(search_result, queue):
-    n = 0
+
+def producer_scan(search_result, queue, queue_lock=None):
+    cnt = 0
     for document in search_result.scan():
+        cnt += 1
+        if cnt == 10:
+            return
         erst_id = document.meta.id
         cvrnummer = document['cvrNummer']
         # cvrnummer is possibly None, e.g. Greenland companies
 
         # date format: Y-m-dTH:M:s[Z+x]
-        offentliggoerelsesTidspunkt = parse_date(document['offentliggoerelsesTidspunkt'][:19])
-        indlaesningsTidspunkt = parse_date(document['indlaesningsTidspunkt'][:19])
+        offentliggoerelsesTidspunkt = document['offentliggoerelsesTidspunkt']
+        offentliggoerelsesTidspunkt = offentliggoerelsesTidspunkt[:19]
+        indlaesningsTidspunkt = document['indlaesningsTidspunkt'][:19]
 
         dokumenter = document['dokumenter']
         xbrl_file_url = None
@@ -589,11 +588,13 @@ def producer_scan(search_result, queue):
         if xbrl_file_url is not None:
             msg = (cvrnummer, offentliggoerelsesTidspunkt, xbrl_file_url,
                    xbrl_extension_url, erst_id, indlaesningsTidspunkt)
+            queue_lock.acquire()
             queue.put(msg)
-            n += 1
-            print(ERASE, end='', flush=True)
-            print('Fetching search results: ?/%s' % n, end='', flush=True)
-    return n
+            popped, pushed = queue.get_statistics()
+            print(ERASE + 'Inserting into db: %s/%s' % (popped, pushed),
+                  end='', flush=True)
+            queue_lock.release()
+    return
 
 
 def fetch_to_db(process_count=1, from_date=datetime(2011, 1, 1)):
@@ -608,29 +609,33 @@ def fetch_to_db(process_count=1, from_date=datetime(2011, 1, 1)):
         s = s.filter('range', offentliggoerelsesTidspunkt={'gte': from_date})
         s = s.sort('offentliggoerelsesTidspunkt')
 
-        #queue = SimpleQueue(1000)
-        queue = Queue(10000)
-        consumer_partial = functools.partial(consumer_insert, aarl=aarl, unit_handler=unit_handler)
+        try:
+            tmp_file = tempfile.NamedTemporaryFile(delete=False)
+            m = IOQueueManager()
+            m.start()
+            queue = m.IOQueue(tmp_file.name)
+            queue_lock = Lock()
+            consumer_partial = functools.partial(consumer_insert, aarl=aarl,
+                                                 queue_lock=queue_lock,
+                                                 unit_handler=unit_handler)
 
-        processes = [Process(target=consumer_partial,
-                             args=(queue,),
-                             daemon=True) for _ in range(process_count)]
-        for p in processes:
-            p.start()
-        engine.dispose()  # for multiprocessing.
-        n = producer_scan(s, queue)
+            processes = [Process(target=consumer_partial,
+                                 args=(queue,),
+                                 daemon=True) for _ in range(process_count)]
+            for p in processes:
+                p.start()
+            engine.dispose()  # for multiprocessing.
+            producer_scan(s, queue, queue_lock=queue_lock)
 
-        for end in range(process_count):
-            queue.put('DONE')
+            queue_lock.acquire()
+            for end in range(process_count):
+                queue.put('DONE')
+            queue_lock.release()
 
-        for i in range(1, n+1, 1):
-            insertion_done = signal_queue.get()
-            print(ERASE + 'Inserting into db: %s/%s' % (i, n), end='', flush=True)
+            for p in processes:
+                p.join()
 
-        print()
-        print("Waiting for processes to join")
-        for p in processes:
-            p.join()
-            print("One joined")
-        print("All joined")
+        finally:
+            os.remove(tmp_file.name)
+            pass
     return
