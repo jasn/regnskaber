@@ -9,6 +9,7 @@ from . import (read_config, interactive_ensure_config_exists,
                setup_database_connection, parse_date)
 
 from . import fetch
+from . import make_feature_table as transform
 
 class Commands:
     @staticmethod
@@ -17,13 +18,13 @@ class Commands:
         # setup engine and Session.
         setup_database_connection()
         fetch.fetch_to_db(processes, from_date)
-        pass
 
     @staticmethod
-    def transform(bar, **general_options):
+    def transform(table_definition_file, **general_options):
         interactive_ensure_config_exists()
         # setup engine and Session.
-        pass
+        setup_database_connection()
+        transform.main(table_definition_file)
 
 
 parser = argparse.ArgumentParser()
@@ -46,13 +47,11 @@ parser_fetch.add_argument('-p', '--processes',
                           default=1)
 
 # TODO: if tables exist, don't create, otherwise create.
-parser_fetch.add_argument('--no-create-tables',
-                          dest='create_tables',
-                          action='store_const',
-                          const=False,
-                          default=True)
 
 parser_transform = subparsers.add_parser('transform', help='build useful tables from data fetched from erst')
+parser_transform.add_argument('table-definition-file', required=True,
+                              type=str, dest='table_definition_file',
+                              help="A file that specifies the table to be created.")
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())
