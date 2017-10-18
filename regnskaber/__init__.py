@@ -11,8 +11,6 @@ from collections import OrderedDict
 
 config_path = Path(__file__).parent / 'config.ini'
 
-# mysql://user:pass@host/database
-
 _engine = None
 _session = None
 
@@ -93,7 +91,7 @@ def setup_database_connection():
     global _engine, _session
 
     config = read_config()
-    connection_url = "{sql_type}://{user}:{pass}@{host}:{port}/{database}"
+    connection_url = "{sql_type}://{user}:{pass}@{host}:{port}/{database}?charset=utf8"
     connection_url = connection_url.format(**config['Global'])
     _engine = create_engine(connection_url, encoding='utf8')
     _session = sessionmaker(bind=engine)
