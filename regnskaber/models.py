@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, BigInteger, Text, ForeignKey, Sequence
+from sqlalchemy import Column, Integer, String, DateTime, BigInteger, UnicodeText, ForeignKey, Sequence
 from sqlalchemy.orm import relationship
 
 
@@ -31,7 +31,7 @@ class FinancialStatementEntry(Base):
     regnskabspostId = Column(Integer, Sequence('regnskabspostId_sequence'), primary_key=True)
     regnskabsId = Column(Integer, ForeignKey('financial_statement.regnskabsId'))
     fieldName = Column(String(length=1000))
-    fieldValue = Column(Text)
+    fieldValue = Column(String(length=2**32-1, convert_unicode=True))
     contextRef = Column(String(length=300))
     unitRef = Column(String(length=100))
     decimals = Column(String(length=20))
