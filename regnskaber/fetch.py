@@ -171,7 +171,7 @@ class AArlCollection(XSDCollection):
             z.extractall(self.tmp_dir)
             return
         print("Fatal Error. Could not unzip aarl.zip. Exiting.",
-              file=sys.stderr)
+              file=sys.stderr, flush=True)
         sys.exit(1)
 
     def __enter__(self):
@@ -190,7 +190,34 @@ class ExtensionCollection(XSDCollection):
         self.find_xsds(extension_dir)
 
 
+class InputRegnskabError(Exception):
+    """Exception raised for errors in the raw regnskabs data.
+    """
+    def __init__(self, erst_id, cvrnummer, offentliggoerelsesTidspunkt,
+                 reason):
+        self.erst_id = erst_id
+        self.cvrnummer = cvrnummer
+        self.reason = reason
+        self.offentliggoerelsesTidspunkt = offentliggoerelsesTidspunkt
+
+    def __str__(self):
+        msg = ("[erst_id = %s] "
+               "[cvrnummer = %s] "
+               "[offentliggoerelsesTidspunkt: %s] "
+               "%s"
+               ) % (
+                   self.erst_id,
+                   self.cvrnummer,
+                   self.offentliggoerelsesTidspunkt,
+                   self.reason
+               )
+        return msg
+
+
 class InputRegnskab(object):
+    """Responsible for providing financial_statement data based on the xbrl_file
+    and its possible extension.
+    """
 
     def __init__(self, cvrnummer, offentliggoerelsesTidspunkt,
                  xbrl_file_url, xbrl_extension_url, erst_id,
@@ -238,8 +265,8 @@ class InputRegnskab(object):
         error_msg = 'Error: could not download extension zip file: %s\n' % (
             xbrl_extension_url
         )
-        self._print_error_msg(error_msg)
-        return None
+        raise InputRegnskabError(self.erst_id, self.cvrnummer,
+                                 self.offentliggoerelsesTidspunkt, error_msg)
 
     def _download_file(self, xbrl_file_url):
         """
@@ -257,8 +284,9 @@ class InputRegnskab(object):
                 error_msg = 'Error: could not save xbrl file: %s\n' % (
                     xbrl_file_url
                 )
-                self._print_error_msg(error_msg)
-                return None
+                raise InputRegnskabError(self.erst_id, self.cvrnummer,
+                                         self.offentliggoerelsesTidspunkt,
+                                         error_msg)
 
     def fix_extension(self, basedir):
         if self._xbrl_extension is None:
@@ -300,8 +328,9 @@ class InputRegnskab(object):
         self.regnskabsForm = None
         res = re.sub(reg_href, repl, document)
         if res == document:
-            self._log_missing_extension()
-            raise RuntimeError()
+            msg = "Error: XBRL extension missing."
+            raise InputRegnskabError(self.erst_id, self.cvrnummer,
+                                     self.offentliggoerelsesTidspunkt, msg)
 
         with open(self.xbrl_file.name, 'w', encoding=ENCODING) as f:
             f.write(res)
@@ -318,9 +347,9 @@ class InputRegnskab(object):
             fixed_document = re.sub(reg_uri, repl, document)
 
         if fixed_document is None:
-            error_msg = 'Error: could not fix url space in downloaded file.\n'
-            self._print_error_msg(error_msg)
-            return
+            msg = 'Error: could not fix url space in downloaded file.\n'
+            raise InputRegnskabError(self.erst_id, self.cvrnummer,
+                                     self.offentliggoerelsesTidspunkt, msg)
 
         with open(self.xbrl_file.name, 'w', encoding=ENCODING) as f:
             f.write(fixed_document)
@@ -338,10 +367,9 @@ class InputRegnskab(object):
                 except (UnicodeDecodeError, UnicodeEncodeError):
                     document = document_raw
         if document is None:
-            error_msg = 'Error: could not fix encoding of '
-            error_msg += 'the downloaded xbrl file\n'
-            self._print_error_msg(error_msg)
-            return
+            msg = 'Error: could not fix encoding of the downloaded xbrl file'
+            raise InputRegnskabError(self.erst_id, self.cvrnummer,
+                                     self.offentliggoerelsesTidspunkt, msg)
 
         with open(self.xbrl_file.name, 'wb') as o:
             o.write(document.encode('utf-8'))
@@ -387,31 +415,6 @@ class InputRegnskab(object):
                                           xbrl_name),
                       file=o)
 
-    def _log_missing_extension(self):
-        msg = ("[erst_id = %s] "
-               "[cvrnummer = %s] "
-               "[offentliggoerelsesTidspunkt: %s] "
-               "Error. XBRL extension missing."
-               ) % (
-                   self.erst_id,
-                   self.cvrnummer,
-                   self.offentliggoerelsesTidspunkt
-               )
-        print(msg, file=sys.stderr)
-        raise RuntimeError
-        return
-
-    def _print_error_msg(self, msg):
-        error_msg = (msg +
-                     '\tcvrnummer: %s\n' +
-                     '\toffentliggoerelsesTidspunkt: %s\n'
-                     '\terst_id: %s') % (
-                         self.cvrnummer,
-                         self.offentliggoerelsesTidspunkt,
-                         self.erst_id
-                     )
-        print(error_msg, file=sys.stderr)
-
 
 def query_by_erst_id(erst_id):
     url = 'http://distribution.virk.dk:80'
@@ -449,12 +452,15 @@ def process(cvrnummer, offentliggoerelsesTidspunkt, xbrl_file, xbrl_extension,
             arelle_generate_csv(regnskab)
             fix_namespaces_in_csv(regnskab)
             drive_regnskab(regnskab)
+    except InputRegnskabError as e:
+        with open('erst_data_errors.txt', 'a') as f:
+            print(e, file=f, flush=True)
     except Exception as e:
-        err_msg = str(e)
-        raise RuntimeError(('Error while processing cvrnummer (%s)'
-                            'erst_id (%s)\nAdditional error: %s' % (
-                                cvrnummer, erst_id, err_msg
-                            )))
+        import traceback
+        etype, exc, tb = sys.exc_info()
+        msg = '[erst_id = %s] Caught Exception.\n' % erst_id
+        msg += ''.join(traceback.format_tb(tb))
+        print(msg, file=sys.stderr, flush=True)
     return
 
 
@@ -510,7 +516,7 @@ def error_elastic_cvr_none(erst_id, offentliggoerelsesTidspunkt):
            "Error: CVR-nummer returned by elasticsearch was None") % (
                erst_id, offentliggoerelsesTidspunkt
            )
-    print(msg, file=sys.stderr)
+    print(msg, file=sys.stderr, flush=True)
     return
 
 
@@ -549,18 +555,14 @@ def consumer_insert(queue, aarl=None, unit_handler=None, queue_lock=None):
             process(cvrnummer, offentliggoerelsesTidspunkt, xbrl_file_url,
                     xbrl_extension_url, erst_id, indlaesningsTidspunkt,
                     aarl, unit_handler)
-        except RuntimeError as e:
+        except Exception as e:
             # already logged elsewhere.
             pass
     return
 
 
 def producer_scan(search_result, queue, queue_lock=None):
-    cnt = 0
     for document in search_result.scan():
-        if cnt == 1000:
-            return
-        cnt += 1
         erst_id = document.meta.id
         cvrnummer = document['cvrNummer']
         # cvrnummer is possibly None, e.g. Greenland companies

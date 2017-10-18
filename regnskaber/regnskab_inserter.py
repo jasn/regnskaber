@@ -71,19 +71,9 @@ def insert_regnskab(f, xml_unit_map, regnskab):
             )
 
         session.commit()
-
-    except (DBAPIError, SQLAlchemyError):
-        session.rollback()
-        import traceback as tb
-        tb.print_exc()
-        raise RuntimeError('DBAPI error or SQLAlchemyError. erst_id = '
-                           % regnskab.erst_id)
     except Exception:
         session.rollback()
-        import traceback as tb
-        tb.print_exc()
-        raise RuntimeError('Error in regnskab insertion. erst_id = %s'
-                           % regnskab.erst_id)
+        raise
     finally:
         session.close()
     return
