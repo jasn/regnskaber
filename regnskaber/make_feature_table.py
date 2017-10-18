@@ -2,18 +2,17 @@ import argparse
 import datetime
 import json
 import pathlib
-import sys
 
 from itertools import groupby
 from pprint import pprint
 
-from .shared import regnskab_row, preprocess_regnskab_tuples, regnskab_iterator, partition_consolidated
+from .shared import regnskab_iterator, partition_consolidated
 from .shared import fetch_regnskabsform_dict
 
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
 
-from sqlalchemy import Table, Column, ForeignKey, MetaData, create_engine
+from sqlalchemy import Table, Column, ForeignKey, MetaData
 from sqlalchemy import DateTime, String, Text
 from sqlalchemy import Sequence, UniqueConstraint
 from sqlalchemy import BigInteger, Boolean, Float, Integer
@@ -29,6 +28,7 @@ current_regnskabs_id = 0
 
 regnskabsform = {}  # initialized in __main__
 
+
 class Header(Base):
     __tablename__ = 'Header'
     headerId = Column(Integer, Sequence('header_id_seq'), primary_key=True)
@@ -42,14 +42,20 @@ class Header(Base):
     gsd_ReportingPeriodStartDate = Column(DateTime)
     fsa_ClassOfReportingEntity = Column(Text)
     cmn_TypeOfAuditorAssistance = Column(Text)
-    __table_args__ = (UniqueConstraint('regnskabsId', 'consolidated',
-                                       name='unique_regnskabsId_consolidated'),)
+    __table_args__ = (
+        UniqueConstraint('regnskabsId', 'consolidated',
+                         name='unique_regnskabsId_consolidated'
+                         ),
+    )
     pass
 
 
 def make_header(regnskab_dict, regnskabsId, consolidated, session):
-    instance = session.query(Header).filter(Header.regnskabsId==regnskabsId,
-                                            Header.consolidated==consolidated).first()
+    instance = session.query(Header).filter(
+        Header.regnskabsId == regnskabsId,
+        Header.consolidated == consolidated
+    ).first()
+
     if instance:
         return instance
 
@@ -62,27 +68,40 @@ def make_header(regnskab_dict, regnskabsId, consolidated, session):
     }
 
     try:
-        header_values['gsd_IdentificationNumberCvrOfReportingEntity'] = generic_number(regnskab_dict, 'gsd:IdentificationNumberCvrOfReportingEntity')
+        header_values['gsd_IdentificationNumberCvrOfReportingEntity'] = (
+            generic_number(regnskab_dict,
+                           'gsd:IdentificationNumberCvrOfReportingEntity')
+        )
     except ValueError:
         header_values['gsd_IdentificationNumberCvrOfReportingEntity'] = None
 
     try:
-        header_values['gsd_InformationOnTypeOfSubmittedReport'] = generic_text(regnskab_dict, 'gsd:InformationOnTypeOfSubmittedReport')
+        header_values['gsd_InformationOnTypeOfSubmittedReport'] = (
+            generic_text(regnskab_dict,
+                         'gsd:InformationOnTypeOfSubmittedReport')
+        )
     except ValueError:
         header_values['gsd_InformationOnTypeOfSubmittedReport'] = None
 
     try:
-        header_values['gsd_ReportingPeriodStartDate'] = generic_date(regnskab_dict, 'gsd:ReportingPeriodStartDate')
+        header_values['gsd_ReportingPeriodStartDate'] = (
+            generic_date(regnskab_dict, 'gsd:ReportingPeriodStartDate')
+        )
     except ValueError:
         header_values['gsd_ReportingPeriodStartDate'] = None
 
     try:
-        header_values['fsa_ClassOfReportingEntity'] = generic_text(regnskab_dict, 'fsa:ClassOfReportingEntity')
+        header_values['fsa_ClassOfReportingEntity'] = (
+            generic_text(regnskab_dict, 'fsa:ClassOfReportingEntity')
+        )
     except ValueError:
         header_values['fsa_ClassOfReportingEntity'] = None
 
     try:
-        header_values['cmn_TypeOfAuditorAssistance'] = generic_text(regnskab_dict, 'cmn:TypeOfAuditorAssistance', when_multiple='any')
+        header_values['cmn_TypeOfAuditorAssistance'] = (
+            generic_text(regnskab_dict, 'cmn:TypeOfAuditorAssistance',
+                         when_multiple='any')
+        )
     except ValueError:
         header_values['cmn_TypeOfAuditorAssistance'] = None
 
@@ -117,7 +136,7 @@ def create_table(table_description, drop_table=False):
             return DateTime()
         if s == 'Boolean':
             return Boolean()
-        raise ValueError('s did not match any known type')
+        raise ValueError('%s did not match any known type' % s)
 
     metadata = MetaData(bind=engine)
     tablename = table_description['tablename']
@@ -137,7 +156,8 @@ def create_table(table_description, drop_table=False):
     return t
 
 
-def populate_row(table_description, regnskab_tuples, regnskabs_id, consolidated=False):
+def populate_row(table_description, regnskab_tuples, regnskabs_id,
+                 consolidated=False):
     """
     returns a dict with keys based on table_description and values
     read from regnskab_tuples based on the method in table_description
@@ -145,8 +165,8 @@ def populate_row(table_description, regnskab_tuples, regnskabs_id, consolidated=
     global current_regnskabs_id
     current_regnskabs_id = regnskabs_id
     regnskab_dict = dict([(k, list(v))
-                               for k, v in groupby(regnskab_tuples,
-                                                   lambda k: k.fieldname)])
+                          for k, v in groupby(regnskab_tuples,
+                                              lambda k: k.fieldname)])
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -190,17 +210,17 @@ def populate_table(table_description, table, start_idx=1):
     conn = orm_connection.connection
     cache = []
     cache_sz = 2000
-    for regnskabs_id, regnskab_tuples in regnskab_iterator(conn,
-                                                           start_idx=start_idx):
-        partition = partition_consolidated(regnskab_tuples)
-        regnskab_tuples_cons, regnskab_tuples_solo = partition
-        if len(regnskab_tuples_cons):
-            row_values = populate_row(table_description, regnskab_tuples_cons,
-                                      regnskabs_id, consolidated=True)
+    for fs_id, fs_entries in regnskab_iterator(conn,
+                                               start_idx=start_idx):
+        partition = partition_consolidated(fs_entries)
+        fs_entries_cons, fs_entries_solo = partition
+        if len(fs_entries_cons):
+            row_values = populate_row(table_description, fs_entries_cons,
+                                      fs_id, consolidated=True)
             cache.append(row_values)
-        if len(regnskab_tuples_solo):
-            row_values = populate_row(table_description, regnskab_tuples_solo,
-                                      regnskabs_id, consolidated=False)
+        if len(fs_entries_solo):
+            row_values = populate_row(table_description, fs_entries_solo,
+                                      fs_id, consolidated=False)
             cache.append(row_values)
         if len(cache) >= cache_sz:
             engine.execute(table.insert(), cache)
@@ -246,7 +266,9 @@ def find_currency(regnskab_dict):
 
     regnskab_dict -- dict of fieldname to corresponding tuples for regnskab.
 
-    returns the ISO name for the currency used, and defaults to 'DKK' otherwise.
+    returns the ISO name for the currency used, and defaults to 'DKK'
+    otherwise.
+
     """
     balance_keys = set(['fsa:Equity', 'fsa:Assets', 'fsa:LiabilitiesAndEquity',
                         'fsa:CurrentAssets', 'fsa:ContributedCapital',
@@ -365,9 +387,11 @@ def generic_number(regnskab_dict, fieldName, dimensions=None):
     }
     try:
         if dimensions is None:
-            values = [t for t in regnskab_dict[fieldName] if len(t.other_dimensions) == 0]
+            values = [t for t in regnskab_dict[fieldName]
+                      if len(t.other_dimensions) == 0]
         else:
-            values = [t for t in regnskab_dict[fieldName] if t.other_dimensions == dimensions]
+            values = [t for t in regnskab_dict[fieldName]
+                      if t.other_dimensions == dimensions]
         if len(values) == 0:
             raise ValueError('No tuples with fieldName %s' % fieldName)
         most_precise = get_most_precise(values)
@@ -383,7 +407,8 @@ def generic_number(regnskab_dict, fieldName, dimensions=None):
     return None
 
 
-def generic_text(regnskab_dict, fieldName, when_multiple='concatenate', dimensions=None):
+def generic_text(regnskab_dict, fieldName, when_multiple='concatenate',
+                 dimensions=None):
     values = regnskab_dict.get(fieldName, ())
     if dimensions is None:
         dimensions = []
@@ -457,10 +482,12 @@ if __name__ == '__main__':
                                  type=str, dest='table_definitions',
                                  default=table_descriptions_file_default)
 
-    argument_parser.add_argument('--start-idx', required=False,
-                                 type=int, dest='start_idx',
-                                 default=1,
-                                 help='The regnskabsId to start from (incrementing untill the end)')
+    argument_parser.add_argument(
+        '--start-idx', required=False,
+        type=int, dest='start_idx',
+        default=1,
+        help='The regnskabsId to start from (incrementing untill the end)'
+    )
 
     args = argument_parser.parse_args()
     config_section = args.config_section
