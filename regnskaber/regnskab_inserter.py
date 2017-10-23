@@ -4,8 +4,6 @@
 import csv
 import datetime
 
-from sqlalchemy.exc import SQLAlchemyError, DBAPIError
-
 from . import Session
 from .models import FinancialStatement, FinancialStatementEntry
 

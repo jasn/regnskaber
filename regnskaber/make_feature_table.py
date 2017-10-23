@@ -202,7 +202,8 @@ def populate_table(table_description, table, start_idx=1):
     print("Populating table %s" % table_description['tablename'])
     cache = []
     cache_sz = 2000
-    for i, end, fs_id, fs_entries in financial_statement_iterator(start_idx=start_idx):
+    fs_iterator = financial_statement_iterator(start_idx=start_idx)
+    for i, end, fs_id, fs_entries in fs_iterator:
         partition = partition_consolidated(fs_entries)
         fs_entries_cons, fs_entries_solo = partition
         if len(fs_entries_cons):

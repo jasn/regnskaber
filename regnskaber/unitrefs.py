@@ -1,14 +1,13 @@
 import requests
 import xml.etree.ElementTree as ET
 from io import StringIO
-from collections import defaultdict
 
 
 def build_unit_map():
 
     # Download and parse the following xml file.
     # It contains many units.
-    utr_url =  'https://www.xbrl.org/utr/utr.xml'
+    utr_url = 'https://www.xbrl.org/utr/utr.xml'
 
     r = requests.get(utr_url)
 
@@ -21,20 +20,25 @@ def build_unit_map():
 
     ns = '{http://www.xbrl.org/2009/utr}'
 
-    unit_map = {unit_id.text: unit_name.text for unit_id, unit_name in (
-                            zip(units.findall('./%sunit/%sunitId' % (ns, ns)),
-                                units.findall('./%sunit/%sunitName' % (ns, ns))))}
+    unit_map = {
+        unit_id.text: unit_name.text
+        for unit_id, unit_name in (
+                zip(units.findall('./%sunit/%sunitId' % (ns, ns)),
+                    units.findall('./%sunit/%sunitName' % (ns, ns)))
+        )
+    }
 
     return unit_map
 
 
 def translate_units(document, unit_map):
     """
-    document is an xml document that defines units. 
+    document is an xml document that defines units.
     The unit_map argument is produced by build_unit_map().
 
     The return value is a dict with unitId to unitName where unitId comes from
-    the definition in document and unitName comes from the definition in unit_map.
+    the definition in document and unitName comes from the definition in
+    unit_map.
     """
     tree = ET.parse(StringIO(document))
     root = tree.getroot()
@@ -65,6 +69,7 @@ def translate_units(document, unit_map):
 
     return result
 
+
 class UnitHandler(object):
 
     def __init__(self):
@@ -72,4 +77,3 @@ class UnitHandler(object):
 
     def translate_units(self, document):
         return translate_units(document, self.unit_map)
-

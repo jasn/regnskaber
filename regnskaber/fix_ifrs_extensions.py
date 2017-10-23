@@ -1,10 +1,10 @@
 import argparse
 import os
 import re
-import shutil
 
 extensions_dir = None  # will be set by argument parser
 output_dir = None  # will be set by argument parser
+
 
 class UnknownXsdException(Exception):
     """
@@ -14,6 +14,7 @@ class UnknownXsdException(Exception):
     def __init__(self, name):
         super().__init__()
         self.name = name
+
 
 def iter_files(directory):
     if directory is None:
@@ -32,6 +33,8 @@ def iter_xsds(directory):
 
 
 xsd_basedir = None
+
+
 def get_xsd(xsd_name):
     global xsd_basedir
     if xsd_basedir is None:
@@ -49,6 +52,7 @@ def get_xsd(xsd_name):
 
     raise UnknownXsdException(xsd_name)
 
+
 get_xsd._cache = {}
 
 
@@ -61,7 +65,7 @@ def replace_xsd_href(document):
     def repl(match_object):
         path = match_object.group(1)
         rest = match_object.group('rest')
-        if rest == None:
+        if rest is None:
             rest = ""
         try:
             local_file = get_xsd(path)
@@ -69,14 +73,13 @@ def replace_xsd_href(document):
         except UnknownXsdException:
             replacement = match_object.group(0)
         return replacement
-
-    reg = re.compile(r'="http://archprod.service.eogs.dk/taxonomy/([^"]*.xsd)(?P<rest>#[^"]*)?"')
+    reg = re.compile(r'="http://archprod.service.eogs.dk/taxonomy/([^"]*.xsd)'
+                     r'(?P<rest>#[^"]*)?"')
     res = re.sub(reg, repl, document)
     return res
 
 
 def run():
-    
     for file_path in iter_files(extensions_dir):
         # we know file_path is prefixed by extensions_dir
         destination = os.path.join(output_dir,
@@ -85,14 +88,11 @@ def run():
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
 
-        #if file_path.endswith('.xsd'):
-            #with open(file_path) as input_file,\
-                #open(destination, 'w') as output_file:
         input_file = open(file_path)
         output_file = open(destination, 'w')
         processed_document = replace_xsd_href(input_file.read())
         output_file.write(processed_document)
-            
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -112,8 +112,8 @@ def main():
     xsd_basedir = args.basedir
     extensions_dir = args.extensionsdir
     output_dir = args.outputdir
-    
     run()
+
 
 if __name__ == "__main__":
     main()

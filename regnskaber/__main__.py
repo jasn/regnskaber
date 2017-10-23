@@ -1,15 +1,12 @@
 import argparse
-from collections import OrderedDict
 import datetime
-import os
 
-from pathlib import Path
-
-from . import (read_config, interactive_ensure_config_exists,
-               setup_database_connection, parse_date)
+from . import (interactive_ensure_config_exists, setup_database_connection,
+               parse_date)
 
 from . import fetch
 from . import make_feature_table as transform
+
 
 class Commands:
     @staticmethod
@@ -48,9 +45,12 @@ parser_fetch.add_argument('-p', '--processes',
 
 # TODO: if tables exist, don't create, otherwise create.
 
-parser_transform = subparsers.add_parser('transform', help='build useful tables from data fetched from erst')
+parser_transform = subparsers.add_parser('transform',
+                                         help=('build useful tables from data '
+                                               'fetched from erst'))
 parser_transform.add_argument('table_definition_file', type=str,
-                              help="A file that specifies the table to be created.")
+                              help=('A file that specifies the table to be '
+                                    'created.'))
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())

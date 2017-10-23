@@ -7,8 +7,6 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from collections import OrderedDict
-
 
 config_path = Path(__file__).parent / 'config.ini'
 
@@ -31,6 +29,7 @@ class DefaultEngineProxy:
 
     def __hash__(self):
         return _engine.__hash__()
+
 
 class DefaultSessionProxy:
     def __getattr__(self, item):
@@ -55,7 +54,9 @@ class DefaultSessionProxy:
 engine = DefaultEngineProxy()
 Session = DefaultSessionProxy()
 
-config_fields = ['host', 'port', 'user', 'passwd', 'database', 'sql_type', 'charset']
+config_fields = ['host', 'port', 'user', 'passwd', 'database', 'sql_type',
+                 'charset']
+
 
 def configure_connection():
     print('No configuration file found.')
@@ -70,7 +71,7 @@ def configure_connection():
         sql_type = input('Sql type [1] mysql [2] postgresql: ')
         try:
             sql_type = int(sql_type)
-            assert(sql_type in [1,2])
+            assert(sql_type in [1, 2])
             sql_type = ['mysql', 'postgresql'][sql_type - 1]
             break
         except (ValueError, AssertionError):
@@ -89,9 +90,11 @@ def configure_connection():
         config.write(fp)
     return
 
+
 def interactive_ensure_config_exists():
     if not config_path.exists():
         configure_connection()
+
 
 def read_config():
     config = configparser.ConfigParser()
@@ -122,4 +125,3 @@ def parse_date(datestr):
         return datetime.datetime.strptime(datestr, '%Y-%m-%dT%H:%M:%S')
     except ValueError:
         return datetime.datetime.strptime(datestr, '%Y-%m-%d')
-
