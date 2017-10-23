@@ -9,7 +9,7 @@ class FinancialStatement(Base):
 
     __tablename__ = 'financial_statement'
 
-    regnskabsId = Column(Integer, Sequence('regnskabsId_sequence'), primary_key=True)
+    id = Column(Integer, Sequence('id_sequence'), primary_key=True)
     offentliggoerelsesTidspunkt = Column(DateTime)
     indlaesningsTidspunkt = Column(DateTime)
     cvrnummer = Column(BigInteger)
@@ -18,8 +18,8 @@ class FinancialStatement(Base):
 
     financial_statement_entries = relationship(
         'FinancialStatementEntry',
-        order_by='FinancialStatementEntry.regnskabspostId',
         back_populates='financial_statement',
+        order_by='FinancialStatementEntry.id',
     )
 
     __table_args__ = {'mysql_row_format': 'COMPRESSED'}
@@ -28,8 +28,8 @@ class FinancialStatementEntry(Base):
 
     __tablename__ = 'financial_statement_entry'
 
-    regnskabspostId = Column(Integer, Sequence('regnskabspostId_sequence'), primary_key=True)
-    regnskabsId = Column(Integer, ForeignKey('financial_statement.regnskabsId'))
+    id = Column(Integer, Sequence('id_sequence'), primary_key=True)
+    financial_statement_id = Column(Integer, ForeignKey('financial_statement.id'))
     fieldName = Column(String(length=1000))
     fieldValue = Column(String(length=2**32-1, convert_unicode=True))
     contextRef = Column(String(length=300))
