@@ -1,27 +1,32 @@
 from collections import namedtuple
-from itertools import groupby
+from contextlib import closing
 
-regnskab_row = namedtuple('regnskab_row', ['regnskabs_id', 'fieldname',
-                                           'fieldValue', 'decimals', 'precision',
-                                           'startDate', 'endDate', 'unitIdXbrl',
-                                           'consolidated',
+from .models import FinancialStatement
+from . import Session
+
+from sqlalchemy.sql.expression import func
+
+fs_entry_row = namedtuple('fs_entry_row', ['fs_id', 'fieldname',
+                                           'fieldValue', 'decimals',
+                                           'precision', 'startDate', 'endDate',
+                                           'unitIdXbrl', 'consolidated',
                                            'has_resultdistribution',
                                            'other_dimensions'])
 
 
-def preprocess_regnskab_tuples(regnskab_tuples):
+def preprocess_fs_entry_rows(fs_entry_rows):
     """Removes ConsolidatedSoloDimension, ConsolidatedMember, and SoloMember
     dimensions and attaches a consolidated flag to the tuple instead.  Parses
     the value of fieldValue to a proper type.  Attaches to each tuple whether
     it is a resultdistribution dimension.
 
     --------
-    returns a list of 'regnskab_row' tuples (named tuple defined above).
+    returns a list of 'fs_entry_row' tuples (named tuple defined above).
 
     """
-    regnskab_result = []
-    for row in regnskab_tuples:
-        dimensions = list(map(str.strip, row[8].split(',')))
+    fs_result = []
+    for entry in fs_entry_rows:
+        dimensions = list(map(str.strip, entry.dimensions.split(',')))
         if 'cmn:ConsolidatedMember' in dimensions:
             consolidated = True
         else:
@@ -43,30 +48,28 @@ def preprocess_regnskab_tuples(regnskab_tuples):
         else:
             has_resultdistribution = False
 
-        result_row = regnskab_row(regnskabs_id=row[0],
-                                  fieldname=row[1],
-                                  fieldValue=arelle_parse_value(row[2]),
-                                  decimals=row[3],
-                                  precision=row[4],
-                                  startDate=row[5],
-                                  endDate=row[6],
-                                  unitIdXbrl=row[7],
-                                  consolidated=consolidated,
-                                  has_resultdistribution=has_resultdistribution,
-                                  other_dimensions=dimensions)
-        regnskab_result.append(result_row)
-    return regnskab_result
+        result_row = fs_entry_row(
+            fs_id=entry.financial_statement_id, fieldname=entry.fieldName,
+            fieldValue=arelle_parse_value(entry.fieldValue),
+            decimals=entry.decimals, precision=entry.precision,
+            startDate=entry.startDate, endDate=entry.endDate,
+            unitIdXbrl=entry.unitIdXbrl, consolidated=consolidated,
+            has_resultdistribution=has_resultdistribution,
+            other_dimensions=dimensions
+        )
+        fs_result.append(result_row)
+    return fs_result
 
 
-def fetch_regnskabsform_dict(conn):
+def fetch_regnskabsform_dict():
     """
     conn -- Connection to the sql server.
     returns a dict from regnskabsId to regnskabsForm.
     """
-    sql = "select regnskabsId, regnskabsForm from regnskaber_files"
-    cursor = conn.cursor()
-    cursor.execute(sql)
-    return dict(cursor.fetchall())
+    with closing(Session()) as session:
+        result = session.query(FinancialStatement.id,
+                               FinancialStatement.regnskabsForm).all()
+        return {r.id: r.regnskabsForm for r in result}
 
 
 def arelle_parse_value(d):
@@ -74,7 +77,7 @@ def arelle_parse_value(d):
     if not isinstance(d, str):  # already decoded.
         return d
     try:
-        return int(d.replace(',',''))
+        return int(d.replace(',', ''))
     except ValueError:
         pass
     try:
@@ -84,7 +87,24 @@ def arelle_parse_value(d):
     return d
 
 
-def regnskab_iterator(conn, start_idx=1, end_idx=None, length=None, buffer_size=500):
+def partition_consolidated(regnskab_tuples):
+    regnskab_tuples_cons = [r for r in regnskab_tuples
+                                    if r.consolidated]
+    regnskab_tuples_solo = [r for r in regnskab_tuples
+                                    if not r.consolidated]
+
+    return regnskab_tuples_cons, regnskab_tuples_solo
+
+
+def get_number_of_rows(start_idx):
+    with closing(Session()) as session:
+        total_rows = session.query(FinancialStatement).filter(
+            FinancialStatement.id >= start_idx).count()
+        return total_rows
+
+
+def financial_statement_iterator(start_idx=1, end_idx=None, length=None,
+                                 buffer_size=500):
     """ Provide an iterator over regnskaber in order of regnskabsId
 
     Arguments:
@@ -105,14 +125,14 @@ def regnskab_iterator(conn, start_idx=1, end_idx=None, length=None, buffer_size=
 
     if end_idx is None and length is None:
         try:
-            sql = "select max(regnskabsId) as m from regnskaber_files"
-            cursor = conn.cursor()
-            cursor.execute(sql)
-            res = cursor.fetchall()
-            end_idx = int(res[0][0]) + 1
-            cursor.close()
+            session = Session()
+            max_id = session.query(func.max(FinancialStatement.id)).scalar()
+            end_idx = max_id + 1
         except (IndexError, ValueError):
-            raise LookupError('Could not lookup maximum regnskabsid in regnskaber_files.')
+            raise LookupError('Could not lookup maximum regnskabsid in '
+                              'regnskaber_files.')
+        finally:
+            session.close()
 
     if end_idx is not None:
         assert(isinstance(end_idx, int))
@@ -121,36 +141,18 @@ def regnskab_iterator(conn, start_idx=1, end_idx=None, length=None, buffer_size=
         assert(isinstance(length, int))
         end_idx = start_idx + length
 
+    total_rows = get_number_of_rows(start_idx)
 
-    sql = """
-    SELECT regnskabsId, fieldname, fieldValue, decimals,
-           regnskaber.precision, startDate, endDate,
-           unitIdXbrl, dimensions
-    FROM regnskaber WHERE regnskabsid >= {0} and regnskabsId < {1}
-    ORDER BY regnskabsId, fieldname
-    """
-
-    with conn.cursor() as cursor:
-        current = start_idx
-        delta = buffer_size
-        while current < end_idx:
-            sql_query = sql.format(current, current + delta)
-            print('Iterating %d <= regnskabsId < %d' % (current, current + delta))
-            current += delta
-            cursor.execute(sql_query)
-            sql_result = cursor.fetchall()
-            if len(sql_result) == 0:
-                continue
-            for regnskabs_id, regnskab in groupby(sql_result, lambda x: x[0]):
-                regnskab_tuples = preprocess_regnskab_tuples(regnskab)
-                yield regnskabs_id, regnskab_tuples
-
-
-
-def partition_consolidated(regnskab_tuples):
-    regnskab_tuples_cons = [r for r in regnskab_tuples
-                                    if r.consolidated]
-    regnskab_tuples_solo = [r for r in regnskab_tuples
-                                    if not r.consolidated]
-
-    return regnskab_tuples_cons, regnskab_tuples_solo
+    curr = start_idx
+    session = Session()
+    while curr < end_idx:
+        q = session.query(FinancialStatement).filter(
+            FinancialStatement.id >= curr,
+            FinancialStatement.id <= min(curr+500, end_idx)
+        ).enable_eagerloads(True).all()
+        for i, fs in enumerate(q):
+            entry_rows = preprocess_fs_entry_rows(fs.financial_statement_entries)
+            yield i+curr, total_rows, fs.id, entry_rows
+        curr += 500
+    session.close()
+    return
