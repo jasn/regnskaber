@@ -5,3 +5,4 @@ port = 3306
 passwd = your_pass
 charset = utf8
 database = erhvervsdata
+sql_type = mysql

@@ -1,5 +1,6 @@
 import configparser
 import datetime
+import getpass
 
 from pathlib import Path
 
@@ -54,16 +55,34 @@ class DefaultSessionProxy:
 engine = DefaultEngineProxy()
 Session = DefaultSessionProxy()
 
-config_fields = ['host', 'port', 'user', 'pass', 'database', 'sql_type']
+config_fields = ['host', 'port', 'user', 'passwd', 'database', 'sql_type', 'charset']
 
 def configure_connection():
     print('No configuration file found.')
     print('Please enter the database connection information below.')
     print('sql_type is either mysql or postgresql')
-    config_values = OrderedDict(
-        (f, input(f + ': ')) for f in config_fields
-    )
-    config_values = dict(Global=config_values)
+    host = input('Hostname: ')
+    port = input('Port: ')
+    user = input('User: ')
+    passwd = getpass.getpass()
+    database = input('Database: ')
+    while True:
+        sql_type = input('Sql type [1] mysql [2] postgresql: ')
+        try:
+            sql_type = int(sql_type)
+            assert(sql_type in [1,2])
+            sql_type = ['mysql', 'postgresql'][sql_type - 1]
+            break
+        except (ValueError, AssertionError):
+            print('Please enter a number, either 1 or 2')
+            continue
+
+    config_values = {
+        'Global': dict(
+            host=host, port=port, user=user, passwd=passwd, database=database,
+            sql_type=sql_type, charset='utf8mb4',
+        )
+    }
     config = configparser.ConfigParser()
     config.read_dict(config_values)
     with open(config_path, 'w') as fp:
@@ -91,7 +110,8 @@ def setup_database_connection():
     global _engine, _session
 
     config = read_config()
-    connection_url = "{sql_type}://{user}:{pass}@{host}:{port}/{database}?charset=utf8"
+    connection_url = ("{sql_type}://{user}:{passwd}@{host}:{port}/"
+                      "{database}?charset={charset}")
     connection_url = connection_url.format(**config['Global'])
     _engine = create_engine(connection_url, encoding='utf8')
     _session = sessionmaker(bind=engine)
