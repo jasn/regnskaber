@@ -9,7 +9,7 @@ from . import (read_config, interactive_ensure_config_exists,
                setup_database_connection, parse_date)
 
 from . import fetch
-#from . import make_feature_table as transform
+from . import make_feature_table as transform
 
 class Commands:
     @staticmethod
@@ -24,7 +24,7 @@ class Commands:
         interactive_ensure_config_exists()
         # setup engine and Session.
         setup_database_connection()
-        #transform.main(table_definition_file)
+        transform.main(table_definition_file)
 
 
 parser = argparse.ArgumentParser()
@@ -49,7 +49,7 @@ parser_fetch.add_argument('-p', '--processes',
 # TODO: if tables exist, don't create, otherwise create.
 
 parser_transform = subparsers.add_parser('transform', help='build useful tables from data fetched from erst')
-parser_transform.add_argument('table-definition-file', type=str,
+parser_transform.add_argument('table_definition_file', type=str,
                               help="A file that specifies the table to be created.")
 
 if __name__ == "__main__":
