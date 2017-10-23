@@ -1,7 +1,5 @@
-import argparse
 import datetime
 import json
-import pathlib
 
 from itertools import groupby
 from pprint import pprint
@@ -16,7 +14,6 @@ from sqlalchemy import Table, Column, ForeignKey, MetaData
 from sqlalchemy import DateTime, String, Text
 from sqlalchemy import Sequence, UniqueConstraint
 from sqlalchemy import BigInteger, Boolean, Float, Integer
-from sqlalchemy.orm import sessionmaker
 
 
 from .models import Base
@@ -165,7 +162,6 @@ def populate_row(table_description, regnskab_tuples, regnskabs_id,
     regnskab_dict = dict([(k, list(v))
                           for k, v in groupby(regnskab_tuples,
                                               lambda k: k.fieldname)])
-    Session = sessionmaker(bind=engine)
     session = Session()
 
     header = make_header(regnskab_dict, regnskabs_id, consolidated, session)
@@ -446,6 +442,8 @@ def fieldname_to_colname(fieldname):
 
 
 def main(table_descriptions_file, start_idx=1):
+    global regnskabsform
+    regnskabsform = fetch_regnskabsform_dict()
     Base.metadata.create_all(engine)
     tables = dict()
 

@@ -1,9 +1,11 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, BigInteger, UnicodeText, ForeignKey, Sequence
+from sqlalchemy import (Column, Integer, String, DateTime, BigInteger,
+                        ForeignKey, Sequence)
 from sqlalchemy.orm import relationship
 
 
 Base = declarative_base()
+
 
 class FinancialStatement(Base):
 
@@ -24,12 +26,14 @@ class FinancialStatement(Base):
 
     __table_args__ = {'mysql_row_format': 'COMPRESSED'}
 
+
 class FinancialStatementEntry(Base):
 
     __tablename__ = 'financial_statement_entry'
 
     id = Column(Integer, Sequence('id_sequence'), primary_key=True)
-    financial_statement_id = Column(Integer, ForeignKey('financial_statement.id'))
+    financial_statement_id = Column(Integer,
+                                    ForeignKey('financial_statement.id'))
     fieldName = Column(String(length=1000))
     fieldValue = Column(String(length=2**32-1, convert_unicode=True))
     contextRef = Column(String(length=300))
@@ -49,4 +53,3 @@ class FinancialStatementEntry(Base):
     )
 
     __table_args__ = {'mysql_row_format': 'COMPRESSED'}
-

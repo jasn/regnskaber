@@ -89,9 +89,9 @@ def arelle_parse_value(d):
 
 def partition_consolidated(regnskab_tuples):
     regnskab_tuples_cons = [r for r in regnskab_tuples
-                                    if r.consolidated]
+                            if r.consolidated]
     regnskab_tuples_solo = [r for r in regnskab_tuples
-                                    if not r.consolidated]
+                            if not r.consolidated]
 
     return regnskab_tuples_cons, regnskab_tuples_solo
 
@@ -151,8 +151,8 @@ def financial_statement_iterator(start_idx=1, end_idx=None, length=None,
             FinancialStatement.id <= min(curr+500, end_idx)
         ).enable_eagerloads(True).all()
         for i, fs in enumerate(q):
-            entry_rows = preprocess_fs_entry_rows(fs.financial_statement_entries)
-            yield i+curr, total_rows, fs.id, entry_rows
+            entries = preprocess_fs_entry_rows(fs.financial_statement_entries)
+            yield i+curr, total_rows, fs.id, entries
         curr += 500
     session.close()
     return
