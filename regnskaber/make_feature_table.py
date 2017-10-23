@@ -6,7 +6,7 @@ import pathlib
 from itertools import groupby
 from pprint import pprint
 
-from .shared import regnskab_iterator, partition_consolidated
+from .shared import financial_statement_iterator, partition_consolidated
 from .shared import fetch_regnskabsform_dict
 
 from langdetect import detect
@@ -17,12 +17,10 @@ from sqlalchemy import DateTime, String, Text
 from sqlalchemy import Sequence, UniqueConstraint
 from sqlalchemy import BigInteger, Boolean, Float, Integer
 from sqlalchemy.orm import sessionmaker
-from dabai.setup import get_engine
 
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
-engine = None  # sqlalchemy engine, initialized in __main__
+from .models import Base
+from . import Session, engine
 
 current_regnskabs_id = 0
 
@@ -31,8 +29,8 @@ regnskabsform = {}  # initialized in __main__
 
 class Header(Base):
     __tablename__ = 'Header'
-    headerId = Column(Integer, Sequence('header_id_seq'), primary_key=True)
-    regnskabsId = Column(Integer())
+    id = Column(Integer, Sequence('id_seq'), primary_key=True)
+    financial_statement_id = Column(Integer())
     consolidated = Column(Boolean())
     currency = Column(String(5))
     language = Column(String(5))
@@ -42,17 +40,17 @@ class Header(Base):
     gsd_ReportingPeriodStartDate = Column(DateTime)
     fsa_ClassOfReportingEntity = Column(Text)
     cmn_TypeOfAuditorAssistance = Column(Text)
+
     __table_args__ = (
-        UniqueConstraint('regnskabsId', 'consolidated',
-                         name='unique_regnskabsId_consolidated'
+        UniqueConstraint('financial_statement_id', 'consolidated',
+                         name='unique_financial_statement_id_consolidated'
                          ),
     )
-    pass
 
 
-def make_header(regnskab_dict, regnskabsId, consolidated, session):
+def make_header(regnskab_dict, financial_statement_id, consolidated, session):
     instance = session.query(Header).filter(
-        Header.regnskabsId == regnskabsId,
+        Header.financial_statement_id == financial_statement_id,
         Header.consolidated == consolidated
     ).first()
 
@@ -60,7 +58,7 @@ def make_header(regnskab_dict, regnskabsId, consolidated, session):
         return instance
 
     header_values = {
-        'regnskabsId': regnskabsId,
+        'financial_statement_id': financial_statement_id,
         'language': find_language(regnskab_dict),
         'currency': find_currency(regnskab_dict),
         'balancedato': find_balancedato(regnskab_dict),
@@ -141,7 +139,7 @@ def create_table(table_description, drop_table=False):
     metadata = MetaData(bind=engine)
     tablename = table_description['tablename']
     columns = [Column('headerId', Integer,
-                      ForeignKey(Header.headerId),
+                      ForeignKey(Header.id),
                       primary_key=True)]
     for column_description in table_description['columns']:
         alchemy_type = type_str_to_alchemy_type(column_description['sqltype'])
@@ -171,7 +169,7 @@ def populate_row(table_description, regnskab_tuples, regnskabs_id,
     session = Session()
 
     header = make_header(regnskab_dict, regnskabs_id, consolidated, session)
-    result = {'headerId': header.headerId}
+    result = {'headerId': header.id}
 
     method_translation = {
         'generic_number': generic_number,
@@ -206,12 +204,9 @@ def populate_table(table_description, table, start_idx=1):
     assert(isinstance(table_description, dict))
     assert(isinstance(table, Table))
     print("Populating table %s" % table_description['tablename'])
-    orm_connection = engine.connect()
-    conn = orm_connection.connection
     cache = []
     cache_sz = 2000
-    for fs_id, fs_entries in regnskab_iterator(conn,
-                                               start_idx=start_idx):
+    for i, end, fs_id, fs_entries in financial_statement_iterator(start_idx=start_idx):
         partition = partition_consolidated(fs_entries)
         fs_entries_cons, fs_entries_solo = partition
         if len(fs_entries_cons):
@@ -228,7 +223,6 @@ def populate_table(table_description, table, start_idx=1):
     if len(cache):
         engine.execute(table.insert(), cache)
         cache = []
-    orm_connection.close()
     return
 
 
@@ -454,12 +448,9 @@ def fieldname_to_colname(fieldname):
 def main(table_descriptions_file, start_idx=1):
     Base.metadata.create_all(engine)
     tables = dict()
-    try:
-        fp = open(table_descriptions_file)
+
+    with open(table_descriptions_file) as fp:
         table_descriptions = json.load(fp)
-        fp.close()
-    except OSError:
-        raise
 
     for t in table_descriptions:
         table = create_table(t, drop_table=(start_idx == 1))
@@ -467,32 +458,3 @@ def main(table_descriptions_file, start_idx=1):
         tables[t['tablename']] = table
 
     return
-
-
-if __name__ == '__main__':
-    p = pathlib.Path(__file__)
-    table_descriptions_file_default = p.parent / 'feature_tables.json'
-    argument_parser = argparse.ArgumentParser()
-
-    argument_parser.add_argument('-l', '--local', default='Global',
-                                 action='store_const', const='Local',
-                                 dest='config_section')
-
-    argument_parser.add_argument('-t', '--table-definitions', required=False,
-                                 type=str, dest='table_definitions',
-                                 default=table_descriptions_file_default)
-
-    argument_parser.add_argument(
-        '--start-idx', required=False,
-        type=int, dest='start_idx',
-        default=1,
-        help='The regnskabsId to start from (incrementing untill the end)'
-    )
-
-    args = argument_parser.parse_args()
-    config_section = args.config_section
-    engine = get_engine(None, config_section)
-    temp_conn = engine.connect()
-    regnskabsform = fetch_regnskabsform_dict(temp_conn.connection)
-    temp_conn.close()
-    main(args.table_definitions, start_idx=args.start_idx)
