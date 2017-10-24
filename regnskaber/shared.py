@@ -142,7 +142,7 @@ def financial_statement_iterator(end_idx=None, length=None, buffer_size=500):
         while curr < end_idx:
             q = session.query(FinancialStatement).filter(
                 FinancialStatement.id >= curr,
-                FinancialStatement.id <= min(curr + buffer_size, end_idx)
+                FinancialStatement.id < min(curr + buffer_size, end_idx)
             ).enable_eagerloads(True).all()
             for i, fs in enumerate(q):
                 entries = preprocess_entry_rows(fs.financial_statement_entries)
