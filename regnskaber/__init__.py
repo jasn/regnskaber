@@ -86,7 +86,7 @@ def configure_connection():
     }
     config = configparser.ConfigParser()
     config.read_dict(config_values)
-    with open(config_path, 'w') as fp:
+    with open(str(config_path), 'w') as fp:
         config.write(fp)
     return
 
@@ -98,12 +98,13 @@ def interactive_ensure_config_exists():
 
 def read_config():
     config = configparser.ConfigParser()
-    with open(config_path) as fp:
+    with open(str(config_path)) as fp:
         config.read_file(fp)
         actual_config_fields = config['Global'].keys()
         missing = set(config_fields) - actual_config_fields
         if missing:
-            print('The configuration file (%s) is invalid. ' % config_path +
+            print('The configuration file (%s) ' % str(config_path)
+                  'is invalid. '
                   'Missing fields %s' % (', '.join(map(repr, missing))))
             raise Exception
         return config
