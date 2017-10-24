@@ -163,9 +163,9 @@ def populate_row(table_description, regnskab_tuples, regnskabs_id,
                           for k, v in groupby(regnskab_tuples,
                                               lambda k: k.fieldname)])
     session = Session()
-
     header = make_header(regnskab_dict, regnskabs_id, consolidated, session)
     result = {'headerId': header.id}
+    session.close()
 
     method_translation = {
         'generic_number': generic_number,
@@ -192,34 +192,42 @@ def populate_row(table_description, regnskab_tuples, regnskabs_id,
                 regnskabs_fieldname,
                 dimensions=dimensions,
             )
-    session.close()
+
     return result
 
 
-def populate_table(table_description, table, start_idx=1):
+def populate_table(table_description, table):
     assert(isinstance(table_description, dict))
     assert(isinstance(table, Table))
     print("Populating table %s" % table_description['tablename'])
     cache = []
     cache_sz = 2000
-    fs_iterator = financial_statement_iterator(start_idx=start_idx)
+    fs_iterator = financial_statement_iterator()
+
+    ERASE = '\r\x1B[K'
+    progress_template = "Processing financial statements %s/%s"
     for i, end, fs_id, fs_entries in fs_iterator:
+        print(ERASE, end='', flush=True)
+        print(progress_template % (i+1, end), end='', flush=True)
         partition = partition_consolidated(fs_entries)
         fs_entries_cons, fs_entries_solo = partition
         if len(fs_entries_cons):
             row_values = populate_row(table_description, fs_entries_cons,
                                       fs_id, consolidated=True)
-            cache.append(row_values)
+            if row_values:
+                cache.append(row_values)
         if len(fs_entries_solo):
             row_values = populate_row(table_description, fs_entries_solo,
                                       fs_id, consolidated=False)
-            cache.append(row_values)
+            if row_values:
+                cache.append(row_values)
         if len(cache) >= cache_sz:
             engine.execute(table.insert(), cache)
             cache = []
     if len(cache):
         engine.execute(table.insert(), cache)
         cache = []
+    print(flush=True)
     return
 
 
@@ -442,7 +450,7 @@ def fieldname_to_colname(fieldname):
     return colname[:40] + colname[-64+40:]
 
 
-def main(table_descriptions_file, start_idx=1):
+def main(table_descriptions_file):
     global regnskabsform
     regnskabsform = fetch_regnskabsform_dict()
     Base.metadata.create_all(engine)
@@ -452,8 +460,8 @@ def main(table_descriptions_file, start_idx=1):
         table_descriptions = json.load(fp)
 
     for t in table_descriptions:
-        table = create_table(t, drop_table=(start_idx == 1))
-        populate_table(t, table, start_idx=start_idx)
+        table = create_table(t, drop_table=True)
+        populate_table(t, table)
         tables[t['tablename']] = table
 
     return
