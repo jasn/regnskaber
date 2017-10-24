@@ -1,4 +1,4 @@
--e git+https://github.com/Arelle/Arelle.git#egg=Arelle
+-e git+https://github.com/Arelle/Arelle.git@a6a758ceda0ff8c4ddf33e5fc174bf892098763d#egg=Arelle-1.0
 certifi==2017.7.27.1
 chardet==3.0.4
 elasticsearch1==1.10.0
