@@ -166,7 +166,7 @@ class AArlCollection(XSDCollection):
         self.find_xsds(self.tmp_dir)
 
     def _unzip(self):
-        with open(AArlCollection.aarl_zip_location, 'rb') as aarl_zip:
+        with open(str(AArlCollection.aarl_zip_location), 'rb') as aarl_zip:
             z = zipfile.ZipFile(aarl_zip)
             z.extractall(self.tmp_dir)
             return
