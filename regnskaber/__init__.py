@@ -103,8 +103,8 @@ def read_config():
         actual_config_fields = config['Global'].keys()
         missing = set(config_fields) - actual_config_fields
         if missing:
-            print('The configuration file (%s) ' % str(config_path)
-                  'is invalid. '
+            print('The configuration file (%s) ' % str(config_path) +
+                  'is invalid. ' +
                   'Missing fields %s' % (', '.join(map(repr, missing))))
             raise Exception
         return config
