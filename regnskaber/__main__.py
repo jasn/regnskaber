@@ -43,14 +43,13 @@ parser_fetch.add_argument('-p', '--processes',
                           type=int,
                           default=1)
 
-# TODO: if tables exist, don't create, otherwise create.
-
 parser_transform = subparsers.add_parser('transform',
                                          help=('build useful tables from data '
-                                               'fetched from erst'))
+                                               'fetched from erst.'))
 parser_transform.add_argument('table_definition_file', type=str,
                               help=('A file that specifies the table to be '
-                                    'created.'))
+                                    'created. If the table name already '
+                                    'exists, it is first deleted.'))
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())
