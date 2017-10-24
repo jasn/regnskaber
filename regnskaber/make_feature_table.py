@@ -208,7 +208,7 @@ def populate_table(table_description, table):
     progress_template = "Processing financial statements %s/%s"
     for i, end, fs_id, fs_entries in fs_iterator:
         print(ERASE, end='', flush=True)
-        print(progress_template % (i+1, end), end='', flush=True)
+        print(progress_template % (i, end), end='', flush=True)
         partition = partition_consolidated(fs_entries)
         fs_entries_cons, fs_entries_solo = partition
         if len(fs_entries_cons):

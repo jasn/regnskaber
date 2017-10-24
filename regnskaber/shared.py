@@ -138,7 +138,7 @@ def financial_statement_iterator(end_idx=None, length=None, buffer_size=500):
     total_rows = get_number_of_rows()
 
     with closing(Session()) as session:
-        curr = 0
+        curr = 1
         while curr < end_idx:
             q = session.query(FinancialStatement).filter(
                 FinancialStatement.id >= curr,
