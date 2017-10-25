@@ -5,7 +5,6 @@ from queue import Empty
 import sys
 
 class IOQueue:
-    _sentinel = "$ioqueue_sentinel$"
     _buffer_size = 128  # elements.
 
     def __init__(self, filename):
@@ -49,15 +48,9 @@ class IOQueue:
 
         with open(self._filename) as qfile:
             qfile.seek(self._seek_to)
-            contents = ""
-            while True:
-                contents += qfile.read(2**16)
-                if contents.find(IOQueue._sentinel):
-                    break
-
-            idx = contents.find(IOQueue._sentinel)
-            self._seek_to += idx + len(IOQueue._sentinel)
-            contents = contents[:idx]
+            contents = qfile.readline()
+            assert contents.endswith('\n')
+            self._seek_to = qfile.tell()
 
             try:
                 self._pop_buffer = [x for x in json.loads(contents)]
@@ -73,8 +66,8 @@ class IOQueue:
         assert(len(self._push_buffer) > 0)
         with open(self._filename, 'a') as qfile:
             to_write = json.dumps(self._push_buffer)
-            print(to_write, file=qfile, end='')
-            print(IOQueue._sentinel, file=qfile, end='')
+            assert '\n' not in to_write
+            print(to_write, file=qfile)
             self._push_buffer = []
 
 
