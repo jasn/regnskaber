@@ -2,7 +2,7 @@ import json
 from multiprocessing import managers
 
 from queue import Empty
-
+import sys
 
 class IOQueue:
     __sentinel = "$ioqueue_sentinel$"
@@ -59,7 +59,11 @@ class IOQueue:
             self.__seek_to += idx + len(IOQueue.__sentinel)
             contents = contents[:idx]
 
-            self.__pop_buffer = [x for x in json.loads(contents)]
+            try:
+                self.__pop_buffer = [x for x in json.loads(contents)]
+            except json.JSONDecodeError as e:
+                print(contents, file=sys.stderr)
+                raise
             self.__pop_buffer = [tuple(x) if type(x) == list else x
                                  for x in self.__pop_buffer]
             self.__buffer_idx = 0
