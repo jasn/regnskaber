@@ -11,12 +11,31 @@ Business authority.  The way this data is organized is not very useful for
 after fetching all the data, that creates tables where each row corresponds to
 one financial statement.
 
+Setup and installation
+=======================
+
+Dependencies
+------------
+The following libraries need to be already installed on your system:
+``libxml2-dev``, ``libxmlsec1-dev``, ``libmysqlclient-dev``.
+You also need to have either a postgres database or a mysql database installed on your system.
+
+Setup
+-----
+The module can be installed using pip after installing the dependencies mentioned earlier.
+Run the following command:
+
+``pip install --process-dependency-links git+https://github.com/jasn/regnskaber``
+
+This should install regnskaber as a module in your current python environment.
+
+
 Fetch
 =====
 
 To fetch the raw data from Danish Business Authority run
 
-    ``python -m regnskaber fetch -p {number of processes}``
+``python -m regnskaber fetch -p {number of processes}``
 
 It might be beneficial for you to use more than one process for getting the
 data since this is a very lengthy process.  Even with several cores it can take a
@@ -51,20 +70,3 @@ This will interactively ask for the needed information, and discard what was
 previously there.  Note that you can interrupt this at any time before entering
 the last detail, and nothing will have changed.
 
-Setup and installation
-=======================
-
-Dependencies
-------------
-The following libraries need to be already installed on your system:
-``libxml2-dev``, ``libxmlsec1-dev``, ``libmysqlclient-dev``.
-You also need to have either a postgres database or a mysql database installed on your system.
-
-Setup
------
-The module can be installed using pip after installing the dependencies mentioned earlier.
-Run the following command:
-
-``pip install --process-dependency-links git+https://github.com/jasn/regnskaber``
-
-This should install regnskaber as a module in your current python environment.
