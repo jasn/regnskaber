@@ -58,10 +58,9 @@ config_fields = ['host', 'port', 'user', 'passwd', 'database', 'sql_type',
                  'charset']
 
 
-def configure_connection():
-    print('No configuration file found.')
+def interactive_configure_connection():
     print('Please enter the database connection information below.')
-    print('sql_type is either mysql or postgresql')
+    print('sql_type is either mysql or postgresql.')
     host = input('Hostname: ')
     port = input('Port: ')
     user = input('User: ')
@@ -93,7 +92,8 @@ def configure_connection():
 
 def interactive_ensure_config_exists():
     if not config_path.exists():
-        configure_connection()
+        print('No configuration file found.')
+        interactive_configure_connection()
 
 
 def read_config():

@@ -2,7 +2,7 @@ import argparse
 import datetime
 
 from . import (interactive_ensure_config_exists, setup_database_connection,
-               parse_date)
+               parse_date, interactive_configure_connection)
 
 from . import fetch
 from . import make_feature_table as transform
@@ -23,6 +23,9 @@ class Commands:
         setup_database_connection()
         transform.main(table_definition_file)
 
+    @staticmethod
+    def reconfigure(**general_options):
+        interactive_configure_connection()
 
 parser = argparse.ArgumentParser()
 
@@ -50,6 +53,10 @@ parser_transform.add_argument('table_definition_file', type=str,
                               help=('A file that specifies the table to be '
                                     'created. If the table name already '
                                     'exists, it is first deleted.'))
+
+parser_reconfigure = subparsers.add_parser('reconfigure',
+                                           help='Reconfigure database info.')
+
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())
