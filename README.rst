@@ -3,9 +3,9 @@ Regnskaber
 
 This is a Python3 module for downloading financial statements from the Danish
 Business Authority (Erhvervsstyrelsen).  There are two primary features:
-``Fetch`` and ``Transform``.
+``fetch`` and ``transform``.
 
-The ``fetch`` command is used for getting the 'raw' data from the Danish
+The ``fetch`` command is used for getting the raw data from the Danish
 Business authority.  The way this data is organized is not very useful for
 'learning', to make it better there is a ``transform`` command that can be run
 after fetching all the data, that creates tables where each row corresponds to
