@@ -23,6 +23,129 @@ current_regnskabs_id = 0
 
 regnskabsform = {}  # initialized in __main__
 
+def generic_number(regnskab_dict, fieldName, when_multiple=None,
+                   dimensions=None):
+    # The following dict is based on 'årsregnskabsloven', see
+    # https://www.retsinformation.dk/forms/r0710.aspx?id=175792#id84310183-d8a6-4104-9f32-cee6d8214740
+    # for more info.  Each list contains the mandatory labels (roman
+    # and arab numerals), which are 0 if not specified in a regnskab.
+    # Each number is the schema specified in the appendix from the above url.
+    regnskabsform_defaults = {
+        # 1. Skema for balance i kontoform (regnskabsklasse B, C og D)
+        1: [
+            'fsa:Assets',
+            'fsa:NoncurrentAssets',
+            'fsa:IntangibleAssets',
+            'fsa:PropertyPlantAndEquipment',
+            'fsa:LongtermInvestmentsAndReceivables',
+            'fsa:CurrentAssets',
+            'fsa:Inventories',
+            'fsa:ShorttermReceivables',
+            'fsa:ShorttermInvestments',
+            'fsa:CashAndCashEquivalents',
+            'fsa:LiabilitiesAndEquity',
+            'fsa:Equity',
+            'fsa:ContributedCapital',
+            'fsa:SharePremium',
+            'fsa:RevaluationReserve',
+            'fsa:OtherReserves',
+            'fsa:Provisions',
+            'fsa:LongtermLiabilitiesOtherThanProvisions',
+            'fsa:ShorttermLiabilitiesOtherThanProvisions', ],
+        # 2. Skema for balance i kontoform – opdeling i lang- og
+        # kortfristede aktiver og passiver (regnskabsklasse B, C og D)
+        2: ['fsa:Assets',
+            'fsa:NoncurrentAssets',
+            'fsa:IntangibleAssets',
+            'fsa:PropertyPlantAndEquipment',
+            'fsa:LongtermInvestmentsAndReceivables',
+            'fsa:CurrentAssets',
+            'fsa:Inventories',
+            'fsa:ShorttermReceivables',
+            'fsa:ShorttermInvestments',
+            'fsa:CashAndCashEquivalents',
+            'fsa:LiabilitiesAndEquity',
+            'fsa:Equity',
+            'fsa:ContributedCapital',
+            'fsa:SharePremium',
+            'fsa:RevaluationReserve',
+            'fsa:OtherReserves',
+            'fsa:RetainedEarnings',
+            'fsa:LongtermLiabilitiesOtherThanProvisions',
+            'fsa:ShorttermLiabilitiesOtherThanProvisions'],
+        # 3. Skema for resultatopgørelse i beretningsform, artsopdelt
+        # (regnskabsklasse B, C og D)
+        3: [],
+        # 4. Skema for resultatopgørelse i beretningsform, funktionsopdelt
+        # (regnskabsklasse B, C og D)
+        4: [],
+    }
+    try:
+        if dimensions is None:
+            values = [t for t in regnskab_dict[fieldName]
+                      if len(t.other_dimensions) == 0]
+        else:
+            values = [t for t in regnskab_dict[fieldName]
+                      if t.other_dimensions == dimensions]
+        if len(values) == 0:
+            raise ValueError('No tuples with fieldName %s' % fieldName)
+        most_precise = get_most_precise(values)
+        return most_precise
+    except (ValueError, KeyError):
+        pass
+    regnskabs_id = find_regnskabs_id()
+    if regnskabs_id == 0:
+        pprint(regnskab_dict, indent=2)
+    kind = get_regnskabsform(regnskabs_id)
+    if kind is not None and fieldName in regnskabsform_defaults[kind]:
+        return 0
+    return None
+
+
+def generic_text(regnskab_dict, fieldName, when_multiple='concatenate',
+                 dimensions=None):
+    values = regnskab_dict.get(fieldName, ())
+    if dimensions is None:
+        dimensions = []
+    xs = set(t.fieldValue for t in values if t.other_dimensions == dimensions)
+    if xs:
+        try:
+            x, = xs
+            return str(x)
+        except ValueError:
+            if when_multiple == 'any':
+                return str(next(iter(xs)))  # return any value
+            elif when_multiple == 'none':
+                return None
+            elif when_multiple == 'concatenate':
+                return ' '.join(str(x) for x in xs)
+            else:
+                print('Multiple values for %s: %s' % (fieldName, xs))
+                raise
+    return None
+
+
+def generic_date(regnskab_dict, fieldName, when_multiple=None,
+                 dimensions=None):
+    try:
+        values = regnskab_dict[fieldName]
+    except KeyError:
+        return None
+
+    for v in values:
+        try:
+            return datetime.datetime.strptime(v.fieldValue, '%Y-%m-%d')
+        except ValueError:
+            pass
+    return None
+
+
+method_translation = {
+        'generic_number': generic_number,
+        'generic_text': generic_text,
+        'generic_date': generic_date
+}
+
 
 class Header(Base):
     __tablename__ = 'Header'
@@ -167,14 +290,10 @@ def populate_row(table_description, regnskab_tuples, regnskabs_id,
     result = {'headerId': header.id}
     session.close()
 
-    method_translation = {
-        'generic_number': generic_number,
-        'generic_text': generic_text,
-        'generic_date': generic_date
-    }
 
     for column_description in table_description['columns']:
         methodname = column_description['method']['name']
+        assert methodname in method_translation.keys()
         dimensions = column_description['dimensions']
         regnskabs_fieldname = column_description['regnskabs_fieldname']
         column_name = column_description['name']
@@ -328,126 +447,17 @@ def get_most_precise(regnskab_tuples):
     return regnskab_tuples[0].fieldValue
 
 
-def generic_number(regnskab_dict, fieldName, dimensions=None):
-    # The following dict is based on 'årsregnskabsloven', see
-    # https://www.retsinformation.dk/forms/r0710.aspx?id=175792#id84310183-d8a6-4104-9f32-cee6d8214740
-    # for more info.  Each list contains the mandatory labels (roman
-    # and arab numerals), which are 0 if not specified in a regnskab.
-    # Each number is the schema specified in the appendix from the above url.
-    regnskabsform_defaults = {
-        # 1. Skema for balance i kontoform (regnskabsklasse B, C og D)
-        1: [
-            'fsa:Assets',
-            'fsa:NoncurrentAssets',
-            'fsa:IntangibleAssets',
-            'fsa:PropertyPlantAndEquipment',
-            'fsa:LongtermInvestmentsAndReceivables',
-            'fsa:CurrentAssets',
-            'fsa:Inventories',
-            'fsa:ShorttermReceivables',
-            'fsa:ShorttermInvestments',
-            'fsa:CashAndCashEquivalents',
-            'fsa:LiabilitiesAndEquity',
-            'fsa:Equity',
-            'fsa:ContributedCapital',
-            'fsa:SharePremium',
-            'fsa:RevaluationReserve',
-            'fsa:OtherReserves',
-            'fsa:Provisions',
-            'fsa:LongtermLiabilitiesOtherThanProvisions',
-            'fsa:ShorttermLiabilitiesOtherThanProvisions', ],
-        # 2. Skema for balance i kontoform – opdeling i lang- og
-        # kortfristede aktiver og passiver (regnskabsklasse B, C og D)
-        2: ['fsa:Assets',
-            'fsa:NoncurrentAssets',
-            'fsa:IntangibleAssets',
-            'fsa:PropertyPlantAndEquipment',
-            'fsa:LongtermInvestmentsAndReceivables',
-            'fsa:CurrentAssets',
-            'fsa:Inventories',
-            'fsa:ShorttermReceivables',
-            'fsa:ShorttermInvestments',
-            'fsa:CashAndCashEquivalents',
-            'fsa:LiabilitiesAndEquity',
-            'fsa:Equity',
-            'fsa:ContributedCapital',
-            'fsa:SharePremium',
-            'fsa:RevaluationReserve',
-            'fsa:OtherReserves',
-            'fsa:RetainedEarnings',
-            'fsa:LongtermLiabilitiesOtherThanProvisions',
-            'fsa:ShorttermLiabilitiesOtherThanProvisions'],
-        # 3. Skema for resultatopgørelse i beretningsform, artsopdelt
-        # (regnskabsklasse B, C og D)
-        3: [],
-        # 4. Skema for resultatopgørelse i beretningsform, funktionsopdelt
-        # (regnskabsklasse B, C og D)
-        4: [],
-    }
-    try:
-        if dimensions is None:
-            values = [t for t in regnskab_dict[fieldName]
-                      if len(t.other_dimensions) == 0]
-        else:
-            values = [t for t in regnskab_dict[fieldName]
-                      if t.other_dimensions == dimensions]
-        if len(values) == 0:
-            raise ValueError('No tuples with fieldName %s' % fieldName)
-        most_precise = get_most_precise(values)
-        return most_precise
-    except (ValueError, KeyError):
-        pass
-    regnskabs_id = find_regnskabs_id()
-    if regnskabs_id == 0:
-        pprint(regnskab_dict, indent=2)
-    kind = get_regnskabsform(regnskabs_id)
-    if kind is not None and fieldName in regnskabsform_defaults[kind]:
-        return 0
-    return None
-
-
-def generic_text(regnskab_dict, fieldName, when_multiple='concatenate',
-                 dimensions=None):
-    values = regnskab_dict.get(fieldName, ())
-    if dimensions is None:
-        dimensions = []
-    xs = set(t.fieldValue for t in values if t.other_dimensions == dimensions)
-    if xs:
-        try:
-            x, = xs
-            return str(x)
-        except ValueError:
-            if when_multiple == 'any':
-                return str(next(iter(xs)))  # return any value
-            elif when_multiple == 'none':
-                return None
-            elif when_multiple == 'concatenate':
-                return ' '.join(str(x) for x in xs)
-            else:
-                print('Multiple values for %s: %s' % (fieldName, xs))
-                raise
-    return None
-
-
-def generic_date(regnskab_dict, fieldName, dimensions=None):
-    try:
-        values = regnskab_dict[fieldName]
-    except KeyError:
-        return None
-
-    for v in values:
-        try:
-            return datetime.datetime.strptime(v.fieldValue, '%Y-%m-%d')
-        except ValueError:
-            pass
-    return None
-
-
 def fieldname_to_colname(fieldname):
     colname = fieldname.replace(':', '_')
     if len(colname) <= 64:
         return colname
     return colname[:40] + colname[-64+40:]
+
+
+def register_method(name, func):
+    global method_translation
+    assert name not in ['generic_date', 'generic_number', 'generic_text']
+    method_translation[name] = func
 
 
 def main(table_descriptions_file):
