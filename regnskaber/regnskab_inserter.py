@@ -8,21 +8,21 @@ from . import Session
 from .models import FinancialStatement, FinancialStatementEntry
 
 
-def initialize_regnskab(regnskab):
-    regnskaber_file = FinancialStatement(
+def initialize_financial_statement(regnskab):
+    financial_statement = FinancialStatement(
         offentliggoerelsesTidspunkt=regnskab.offentliggoerelsesTidspunkt,
         indlaesningsTidspunkt=regnskab.indlaesningsTidspunkt,
         cvrnummer=regnskab.cvrnummer,
         regnskabsForm=regnskab.regnskabsForm,
         erst_id=regnskab.erst_id
     )
-    return regnskaber_file
+    return financial_statement
 
 
 def insert_regnskab(f, xml_unit_map, regnskab):
     session = Session()
     try:
-        regnskaber_file = initialize_regnskab(regnskab)
+        regnskaber_file = initialize_financial_statement(regnskab)
         session.add(regnskaber_file)
         csv_dict_reader = csv.DictReader(f)
         for row in csv_dict_reader:
