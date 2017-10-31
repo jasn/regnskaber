@@ -462,12 +462,10 @@ def process(cvrnummer, offentliggoerelsesTidspunkt, xbrl_file, xbrl_extension,
     return
 
 
-def insert_by_erst_id(erst_id, aarl=None, unit_handler=None):
+def debug_by_erst_id(erst_id):
     # datetime_format = '%Y-%m-%dT%H:%M:%S.%f'
-    if aarl is None:
-        aarl = AArlCollection()
-    if unit_handler is None:
-        unit_handler = UnitHandler()
+    aarl = AArlCollection()
+    unit_handler = UnitHandler()
     res = query_by_erst_id(erst_id)
     hit = res[0]
     cvrnummer = hit['_source']['cvrNummer']
@@ -483,7 +481,9 @@ def insert_by_erst_id(erst_id, aarl=None, unit_handler=None):
     dokumenter = hit['_source']['dokumenter']
     xbrl_file_url = None
     xbrl_extension_url = None
-
+    import json
+    print(json.dumps(hit, indent=2))
+    print()
     for dokument in dokumenter:
         if (dokument['dokumentMimeType'].lower() == 'application/xml' and
                 dokument['dokumentType'].lower() == 'aarsrapport'):
@@ -492,9 +492,22 @@ def insert_by_erst_id(erst_id, aarl=None, unit_handler=None):
             xbrl_extension_url = dokument['dokumentUrl']
 
     if xbrl_file_url is not None:
-        process(cvrnummer, offentliggoerelsesTidspunkt, xbrl_file_url,
-                xbrl_extension_url, erst_id, indlaesningsTidspunkt,
-                aarl, unit_handler)
+        regnskab = InputRegnskab(cvrnummer, offentliggoerelsesTidspunkt,
+                                 xbrl_file_url, xbrl_extension_url, erst_id,
+                                 indlaesningsTidspunkt)
+        regnskab.output_namespaces()
+        regnskab.output_units(unit_handler)
+        regnskab.fix_extension(aarl.tmp_dir)
+        regnskab.fix_xbrl_file(aarl)
+        arelle_generate_csv(regnskab)
+        fix_namespaces_in_csv(regnskab)
+        files = [
+            regnskab.xbrl_file.name,
+            regnskab.xbrl_file.name + '.csv',
+            regnskab.xbrl_file.name + '.csv_namespaces',
+            regnskab.xbrl_file.name + '.csv_units',
+        ]
+        print('\n'.join(files))
     return
 
 
