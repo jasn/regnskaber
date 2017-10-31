@@ -106,6 +106,9 @@ def fix_namespaces_in_csv(regnskab):
             columns = [0] + list(range(10, len(row)))  # first and dimensions.
 
             for c in columns:
+                if row[c] == 'None':
+                    row.pop(c)
+                    continue
                 index = row[c].find(':')
                 if index != -1:
                     prefix = row[c][:index]
