@@ -98,11 +98,9 @@ def fix_namespaces_in_csv(regnskab):
             'http://xbrl.dcca.dk/tax': 'tax'
         }
 
-        first = True
         for i, row in enumerate(csv_reader):
-            if first:
+            if i == 0:
                 csv_writer.writerow(row)
-                first = False
                 continue
 
             columns = [0] + list(range(10, len(row)))  # first and dimensions.
