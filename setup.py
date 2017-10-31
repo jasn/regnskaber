@@ -14,7 +14,7 @@ setup(
     license='MIT',
     packages=['regnskaber'],
     install_requires=[
-        'Arelle=1.0',
+        'Arelle==1.0',
         'certifi==2017.7.27.1',
         'chardet==3.0.4',
         'elasticsearch1==1.10.0',
