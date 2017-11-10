@@ -11,6 +11,16 @@ Business authority.  The way this data is organized is not very useful for
 after fetching all the data, that creates tables where each row corresponds to
 one financial statement.
 
+If you use this script to fetch data for academic purposes please cite it as follows (BibTeX):
+```bibtex
+@misc{erst_data,
+  author = {Allan Gr{\o}nlund J{\o}rgensen and Jesper Sindahl Nielsen},
+  title = {Danish {B}usiness {A}uthority {D}ata {F}etcher},
+  year = {2017},
+  howpublished = {\url{https://github.com/jasn/regnskaber}}
+}
+```
+
 Setup and installation
 =======================
 
