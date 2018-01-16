@@ -98,27 +98,35 @@ def fix_namespaces_in_csv(regnskab):
             'http://xbrl.dcca.dk/tax': 'tax'
         }
 
+        def fix_namespace(value):
+            result = value
+            index = value.find(':')
+            if index != -1:
+                prefix = value[:index]
+                suffix = value[index+1:]
+                replacement = prefix
+                if prefix in namespaces.keys():
+                    if namespaces[prefix] in replacements:
+                        replacement = replacements[namespaces[prefix]]
+                result = replacement + ':' + suffix
+            return result
+
+        def remove_none_dimensions(row):
+            return row[:10] + [v for v in row[10:] if v != 'None']
+
         for i, row in enumerate(csv_reader):
             if i == 0:
+                # header
                 csv_writer.writerow(row)
                 continue
 
-            columns = [0] + list(range(10, len(row)))  # first and dimensions.
-
+            new_row = remove_none_dimensions(row)
+            # field name and dimensions.
+            columns = [0] + list(range(10, len(new_row)))
             for c in columns:
-                if row[c] == 'None':
-                    row.pop(c)
-                    continue
-                index = row[c].find(':')
-                if index != -1:
-                    prefix = row[c][:index]
-                    suffix = row[c][index+1:]
-                    replacement = prefix
-                    if prefix in namespaces.keys():
-                        if namespaces[prefix] in replacements:
-                            replacement = replacements[namespaces[prefix]]
-                    row[c] = replacement + ':' + suffix
-            csv_writer.writerow(row)
+                new_row[c] = fix_namespace(new_row[c])
+
+            csv_writer.writerow(new_row)
 
     output.seek(0)
     with open(filename, 'w', encoding=ENCODING) as f:
