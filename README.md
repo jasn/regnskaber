@@ -5,11 +5,10 @@ This is a Python3 module for downloading financial statements from the Danish
 Business Authority (Erhvervsstyrelsen).  There are two primary features:
 ``fetch`` and ``transform``.
 
-The ``fetch`` command is used for getting the raw data from the Danish
-Business authority.  The way this data is organized is not very useful for
-'learning', to make it better there is a ``transform`` command that can be run
-after fetching all the data, that creates tables where each row corresponds to
-one financial statement.
+The ``fetch`` command is used for getting the raw data from the Danish Business authority into an SQL store (MySQL or Postgres). 
+The way this data is organized is not very useful for 'learning'.
+To better organize the data there is a ``transform`` command that can be run after fetching all the data.
+The ``transform`` command creates tables where each row corresponds to one financial statement.
 
 If you use this script to fetch data for academic purposes please cite it as follows (BibTeX):
 ```bibtex
@@ -23,12 +22,18 @@ If you use this script to fetch data for academic purposes please cite it as fol
 
 Setup and installation
 =======================
+The package works out of the box on Linux and macOS.
+For installation on Windows it is recommended to use Docker and a Linux distribution, see the [Windows instructions](#Windows-Specific).
 
 Dependencies
 ------------
 The following libraries need to be already installed on your system:
-``libxml2-dev``, ``libxmlsec1-dev``, ``libmysqlclient-dev``.
+``libxml2``, ``libxmlsec1``, ``libmysqlclient``.
 You also need to have either a postgres database or a mysql database installed on your system.
+
+The following commands will install the dependencies for this package
+* ``apt-get update``
+* ``apt-get install build-essential libxml2 libxmlsec1 libmysqlclient``
 
 Setup
 -----
@@ -39,6 +44,12 @@ Run the following command:
 
 This should install regnskaber as a module in your current python environment.
 
+Windows Specific
+-------------------
+1. Install Docker: https://docs.docker.com/toolbox/toolbox_install_windows/#what-you-get-and-how-it-works
+2. Install Ubuntu with anaconda – https://github.com/ContinuumIO/docker-images/tree/master/anaconda3
+3. Start the Docker image.
+4. Continue with setting up the dependencies and installing this package.
 
 Fetch
 =====
