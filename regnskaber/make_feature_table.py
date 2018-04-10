@@ -290,7 +290,6 @@ def populate_row(table_description, regnskab_tuples, regnskabs_id,
     result = {'headerId': header.id}
     session.close()
 
-
     for column_description in table_description['columns']:
         methodname = column_description['method']['name']
         assert methodname in method_translation.keys()

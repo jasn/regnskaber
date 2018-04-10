@@ -15,7 +15,6 @@ class FinancialStatement(Base):
     offentliggoerelsesTidspunkt = Column(DateTime)
     indlaesningsTidspunkt = Column(DateTime)
     cvrnummer = Column(BigInteger)
-    regnskabsForm = Column(String(length=200))
     erst_id = Column(String(length=100), index=True, unique=True)
 
     financial_statement_entries = relationship(
@@ -36,16 +35,13 @@ class FinancialStatementEntry(Base):
                                     ForeignKey('financial_statement.id'))
     fieldName = Column(String(length=1000))
     fieldValue = Column(Text(length=2**32-1, convert_unicode=True))
-    contextRef = Column(String(length=300))
-    unitRef = Column(String(length=100))
     decimals = Column(String(length=20))
-    precision = Column(String(length=20))
     cvrnummer = Column(BigInteger)
     startDate = Column(DateTime)
     endDate = Column(DateTime)
     dimensions = Column(String(length=10000))
     unitIdXbrl = Column(String(length=100))
-    unitNameXbrl = Column(String(length=100))
+    koncern = Column(Integer)
 
     financial_statement = relationship(
         'FinancialStatement',
