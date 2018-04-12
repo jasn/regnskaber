@@ -246,15 +246,6 @@
         }
       },
       {
-        "name": "fsa_OtherInterestExpenses",
-        "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:OtherInterestExpenses",
-        "dimensions": null,
-        "method": {
-          "name": "generic_number"
-        }
-      },
-      {
         "name": "fsa_OtherExternalExpenses",
         "sqltype": "Double",
         "regnskabs_fieldname": "fsa:OtherExternalExpenses",
@@ -276,6 +267,15 @@
         "name": "fsa_OtherFinanceIncome",
         "sqltype": "Double",
         "regnskabs_fieldname": "fsa:OtherFinanceIncome",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "fsa_OtherInterestExpenses",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:OtherInterestExpenses",
         "dimensions": null,
         "method": {
           "name": "generic_number"
@@ -579,73 +579,10 @@
         }
       },
       {
-        "name": "profitloss_resdist_retained_earnings",
-        "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:RetainedEarningsMember"],
-        "method": {
-          "name": "generic_number"
-        }
-      },
-      {
-        "name": "profitloss_resdist_ProposedDividendRecognisedInEquity",
-        "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ProposedDividendRecognisedInEquityMember"],
-        "method": {
-          "name": "generic_number"
-        }
-      },
-      {
-        "name": "profitloss_resdist_ReserveForNetRevaluationAccordingToEquity",
-        "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ReserveForNetRevaluationAccordingToEquityMethodMember"],
-        "method": {
-          "name": "generic_number"
-        }
-      },
-      {
-        "name": "profitloss_resdist_ProposedDividendRecognisedInLiabilities",
-        "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ProposedDividendRecognisedInLiabilitiesMember"],
-        "method": {
-          "name": "generic_number"
-        }
-      },
-      {
-        "name": "profitloss_resdist_ProposedExtraordinaryDividendRecognisedInEq",
-        "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ProposedExtraordinaryDividendRecognisedInEquityMember"],
-        "method": {
-          "name": "generic_number"
-        }
-      },
-      {
-        "name": "profitloss_resdist_ProposedExtraordinaryDividendRecognInLiabilit",
-        "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ProposedExtraordinaryDividendRecognisedInLiabilitiesMember"],
-        "method": {
-          "name": "generic_number"
-        }
-      },
-      {
         "name": "profitloss_resdist_Distributions",
         "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:DistributionsMember"],
-        "method": {
-          "name": "generic_number"
-        }
-      },
-      {
-        "name": "profitloss_resdist_RestOfOtherReserves",
-        "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:RestOfOtherReservesMember"],
+        "regnskabs_fieldname": "fsa:ProfitLoss_DistributionsMember",
+        "dimensions": null,
         "method": {
           "name": "generic_number"
         }
@@ -653,35 +590,53 @@
       {
         "name": "profitloss_resdist_OtherStatutoryReserves",
         "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:OtherStatutoryReservesMember"],
+        "regnskabs_fieldname": "fsa:ProfitLoss_OtherStatutoryReservesMember",
+        "dimensions": null,
         "method": {
           "name": "generic_number"
         }
       },
       {
-        "name": "profitloss_resdist_ReserveForNetRevaluationOfInvestmentAssets",
+        "name": "profitloss_resdist_retained_earnings",
         "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ReserveForNetRevaluationOfInvestmentAssetsMember"],
+        "regnskabs_fieldname": "fsa:ProfitLoss_RetainedEarningsMember",
+        "dimensions": null,
         "method": {
           "name": "generic_number"
         }
       },
       {
-        "name": "profitloss_resdist_TransferredFromToReserveFund",
+        "name": "profitloss_resdist_ProposedDividendRecognisedInEquity",
         "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:TransferredFromToReserveFundMember"],
+        "regnskabs_fieldname": "fsa:ProfitLoss_ProposedDividendRecognisedInEquityMember",
+        "dimensions": null,
         "method": {
           "name": "generic_number"
         }
       },
       {
-        "name": "profitloss_resdist_TransferredFromToReservesAvailable",
+        "name": "profitloss_resdist_ProposedDividendRecognisedInLiabilities",
         "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:TransferredFromToReservesAvailableMember"],
+        "regnskabs_fieldname": "fsa:ProfitLoss_ProposedDividendRecognisedInLiabilitiesMember",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ProposedExtraordinaryDividendRecognisedInEq",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss_ProposedExtraordinaryDividendRecognisedInEquityMember",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ProposedExtraordinaryDividendRecognInLiabilit",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss_ProposedExtraordinaryDividendRecognisedInLiabilitiesMember",
+        "dimensions": null,
         "method": {
           "name": "generic_number"
         }
@@ -689,17 +644,35 @@
       {
         "name": "profitloss_resdist_ReserveAccordingToArticlesOfAssociation",
         "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:ReserveAccordingToArticlesOfAssociationMember"],
+        "regnskabs_fieldname": "fsa:ProfitLoss_ReserveAccordingToArticlesOfAssociationMember",
+        "dimensions": null,
         "method": {
           "name": "generic_number"
         }
       },
       {
-        "name": "profitloss_resdist_TransferredToReserveForEntrepreneurialCompany",
+        "name": "profitloss_resdist_ReserveForNetRevaluationAccordingToEquity",
         "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:TransferredToReserveForEntrepreneurialCompanyMember"],
+        "regnskabs_fieldname": "fsa:ProfitLoss_ReserveForNetRevaluationAccordingToEquityMethodMember",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_ReserveForNetRevaluationOfInvestmentAssets",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss_ReserveForNetRevaluationOfInvestmentAssetsMember",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_RestOfOtherReserves",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss_RestOfOtherReservesMember",
+        "dimensions": null,
         "method": {
           "name": "generic_number"
         }
@@ -707,8 +680,35 @@
       {
         "name": "profitloss_resdist_TransferredFromToHedgeFundMember",
         "sqltype": "Double",
-        "regnskabs_fieldname": "fsa:ProfitLoss",
-        "dimensions": ["fsa:ResultDistributionDimension", "fsa:TransferredFromToHedgeFundMember"],
+        "regnskabs_fieldname": "fsa:ProfitLoss_TransferredFromToHedgeFundMember",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_TransferredFromToReserveFund",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss_TransferredFromToReserveFundMember",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_TransferredFromToReservesAvailable",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss_TransferredFromToReservesAvailableMember",
+        "dimensions": null,
+        "method": {
+          "name": "generic_number"
+        }
+      },
+      {
+        "name": "profitloss_resdist_TransferredToReserveForEntrepreneurialCompany",
+        "sqltype": "Double",
+        "regnskabs_fieldname": "fsa:ProfitLoss_TransferredToReserveForEntrepreneurialCompanyMember",
+        "dimensions": null,
         "method": {
           "name": "generic_number"
         }

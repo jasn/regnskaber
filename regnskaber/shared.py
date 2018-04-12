@@ -1,4 +1,5 @@
-from collections import namedtuple
+import datetime
+
 from contextlib import closing
 
 from .models import FinancialStatement
@@ -6,70 +7,60 @@ from . import Session
 
 from sqlalchemy.sql.expression import func
 
-fs_entry_row = namedtuple('fs_entry_row', ['fs_id', 'fieldname',
-                                           'fieldValue', 'decimals',
-                                           'precision', 'startDate', 'endDate',
-                                           'unitIdXbrl', 'consolidated',
-                                           'has_resultdistribution',
-                                           'other_dimensions'])
+
+def get_reporting_period(fs_entries):
+    date_format = '%Y-%m-%d'
+    start_date = None
+    end_date = None
+    for entry in fs_entries:
+        if entry.fieldName == 'gsd:ReportingPeriodStartDate':
+            start_date = entry.fieldValue
+        if entry.fieldName == 'gsd:ReportingPeriodEndDate':
+            end_date = entry.fieldValue
+    start_date = datetime.datetime.strptime(start_date[:10], date_format)
+    end_date = datetime.datetime.strptime(end_date[:10], date_format)
+    return start_date, end_date
 
 
-def preprocess_entry_rows(fs_entry_rows):
-    """Removes ConsolidatedSoloDimension, ConsolidatedMember, and SoloMember
-    dimensions and attaches a consolidated flag to the tuple instead.  Parses
-    the value of fieldValue to a proper type.  Attaches to each tuple whether
-    it is a resultdistribution dimension.
+def date_is_in_range(start_date, end_date, query_date):
+    if start_date is None and end_date is None:
+        return True
 
-    --------
-    returns a list of 'fs_entry_row' tuples (named tuple defined above).
+    if start_date is None:
+        return query_date <= end_date
+
+    if end_date is None:
+        return query_date >= start_date
+
+    return query_date >= start_date and query_date <= end_date
+
+
+def date_is_instant(start_date, end_date):
+    return start_date is None and end_date is not None
+
+
+def filter_reporting_period(fs_entries):
+    """
+    returns a subset fs_entries where each entry is in the reporting period.
 
     """
-    fs_result = []
-    for entry in fs_entry_rows:
-        dimensions = list(map(str.strip, entry.dimensions.split(',')))
-        if 'cmn:ConsolidatedMember' in dimensions:
-            consolidated = True
-        else:
-            consolidated = False
+    start_date, end_date = get_reporting_period(fs_entries)
+    result = []
+    for entry in fs_entries:
+        if entry.startDate is None and entry.endDate is None:
+            continue
+        if date_is_instant(entry.startDate, entry.endDate):
+            if date_is_in_range(start_date, end_date, entry.endDate):
+                # append to result
+                result.append(entry)
+            continue
 
-        for r in ['cmn:ConsolidatedSoloDimension', 'cmn:ConsolidatedMember',
-                  'cmn:SoloMember']:
-            try:
-                dimensions.remove(r)
-            except:
-                pass
+        if (not date_is_in_range(start_date, end_date, entry.startDate) or
+                not date_is_in_range(start_date, end_date, entry.endDate)):
+            continue
+        result.append(entry)
 
-        # remove empty dimensions.
-        dimensions = [d for d in dimensions
-                      if len(d.strip()) > 0 and d.strip() != 'None']
-
-        if 'fsa:ResultDistributionDimension' in dimensions:
-            has_resultdistribution = True
-        else:
-            has_resultdistribution = False
-
-        result_row = fs_entry_row(
-            fs_id=entry.financial_statement_id, fieldname=entry.fieldName,
-            fieldValue=arelle_parse_value(entry.fieldValue),
-            decimals=entry.decimals, precision=entry.precision,
-            startDate=entry.startDate, endDate=entry.endDate,
-            unitIdXbrl=entry.unitIdXbrl, consolidated=consolidated,
-            has_resultdistribution=has_resultdistribution,
-            other_dimensions=dimensions
-        )
-        fs_result.append(result_row)
-    return fs_result
-
-
-def fetch_regnskabsform_dict():
-    """
-    conn -- Connection to the sql server.
-    returns a dict from regnskabsId to regnskabsForm.
-    """
-    with closing(Session()) as session:
-        result = session.query(FinancialStatement.id,
-                               FinancialStatement.regnskabsForm).all()
-        return {r.id: r.regnskabsForm for r in result}
+    return result
 
 
 def arelle_parse_value(d):
@@ -87,11 +78,11 @@ def arelle_parse_value(d):
     return d
 
 
-def partition_consolidated(fs_tuples):
-    fs_tuples_cons = [r for r in fs_tuples
-                      if r.consolidated]
-    fs_tuples_solo = [r for r in fs_tuples
-                      if not r.consolidated]
+def partition_consolidated(fs_entries):
+    fs_tuples_cons = [r for r in fs_entries
+                      if r.koncern]
+    fs_tuples_solo = [r for r in fs_entries
+                      if not r.koncern]
 
     return fs_tuples_cons, fs_tuples_solo
 
@@ -145,7 +136,7 @@ def financial_statement_iterator(end_idx=None, length=None, buffer_size=500):
                 FinancialStatement.id < min(curr + buffer_size, end_idx)
             ).enable_eagerloads(True).all()
             for i, fs in enumerate(q):
-                entries = preprocess_entry_rows(fs.financial_statement_entries)
+                entries = filter_reporting_period(fs.financial_statement_entries)
                 yield i+curr, total_rows, fs.id, entries
             curr += buffer_size
     return

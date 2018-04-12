@@ -5,10 +5,6 @@ from itertools import groupby
 from pprint import pprint
 
 from .shared import financial_statement_iterator, partition_consolidated
-from .shared import fetch_regnskabsform_dict
-
-from langdetect import detect
-from langdetect.lang_detect_exception import LangDetectException
 
 from sqlalchemy import Table, Column, ForeignKey, MetaData
 from sqlalchemy import DateTime, String, Text
@@ -21,7 +17,6 @@ from . import Session, engine
 
 current_regnskabs_id = 0
 
-regnskabsform = {}  # initialized in __main__
 
 def generic_number(regnskab_dict, fieldName, when_multiple=None,
                    dimensions=None):
@@ -31,62 +26,50 @@ def generic_number(regnskab_dict, fieldName, when_multiple=None,
     # and arab numerals), which are 0 if not specified in a regnskab.
     # Each number is the schema specified in the appendix from the above url.
     regnskabsform_defaults = {
-        # 1. Skema for balance i kontoform (regnskabsklasse B, C og D)
-        1: [
-            'fsa:Assets',
-            'fsa:NoncurrentAssets',
-            'fsa:IntangibleAssets',
-            'fsa:PropertyPlantAndEquipment',
-            'fsa:LongtermInvestmentsAndReceivables',
-            'fsa:CurrentAssets',
-            'fsa:Inventories',
-            'fsa:ShorttermReceivables',
-            'fsa:ShorttermInvestments',
-            'fsa:CashAndCashEquivalents',
-            'fsa:LiabilitiesAndEquity',
-            'fsa:Equity',
-            'fsa:ContributedCapital',
-            'fsa:SharePremium',
-            'fsa:RevaluationReserve',
-            'fsa:OtherReserves',
-            'fsa:Provisions',
-            'fsa:LongtermLiabilitiesOtherThanProvisions',
-            'fsa:ShorttermLiabilitiesOtherThanProvisions', ],
-        # 2. Skema for balance i kontoform – opdeling i lang- og
-        # kortfristede aktiver og passiver (regnskabsklasse B, C og D)
-        2: ['fsa:Assets',
-            'fsa:NoncurrentAssets',
-            'fsa:IntangibleAssets',
-            'fsa:PropertyPlantAndEquipment',
-            'fsa:LongtermInvestmentsAndReceivables',
-            'fsa:CurrentAssets',
-            'fsa:Inventories',
-            'fsa:ShorttermReceivables',
-            'fsa:ShorttermInvestments',
-            'fsa:CashAndCashEquivalents',
-            'fsa:LiabilitiesAndEquity',
-            'fsa:Equity',
-            'fsa:ContributedCapital',
-            'fsa:SharePremium',
-            'fsa:RevaluationReserve',
-            'fsa:OtherReserves',
-            'fsa:RetainedEarnings',
-            'fsa:LongtermLiabilitiesOtherThanProvisions',
-            'fsa:ShorttermLiabilitiesOtherThanProvisions'],
-        # 3. Skema for resultatopgørelse i beretningsform, artsopdelt
-        # (regnskabsklasse B, C og D)
-        3: [],
-        # 4. Skema for resultatopgørelse i beretningsform, funktionsopdelt
-        # (regnskabsklasse B, C og D)
-        4: [],
+        'fsa:Assets',
+        'fsa:NoncurrentAssets',
+        'fsa:IntangibleAssets',
+        'fsa:PropertyPlantAndEquipment',
+        'fsa:LongtermInvestmentsAndReceivables',
+        'fsa:CurrentAssets',
+        'fsa:Inventories',
+        'fsa:ShorttermReceivables',
+        'fsa:ShorttermInvestments',
+        'fsa:CashAndCashEquivalents',
+        'fsa:LiabilitiesAndEquity',
+        'fsa:Equity',
+        'fsa:ContributedCapital',
+        'fsa:SharePremium',
+        'fsa:RevaluationReserve',
+        'fsa:OtherReserves',
+        'fsa:Provisions',
+        'fsa:LongtermLiabilitiesOtherThanProvisions',
+        'fsa:ShorttermLiabilitiesOtherThanProvisions',
+        'fsa:Assets',
+        'fsa:NoncurrentAssets',
+        'fsa:IntangibleAssets',
+        'fsa:PropertyPlantAndEquipment',
+        'fsa:LongtermInvestmentsAndReceivables',
+        'fsa:CurrentAssets',
+        'fsa:Inventories',
+        'fsa:ShorttermReceivables',
+        'fsa:ShorttermInvestments',
+        'fsa:CashAndCashEquivalents',
+        'fsa:LiabilitiesAndEquity',
+        'fsa:Equity',
+        'fsa:ContributedCapital',
+        'fsa:SharePremium',
+        'fsa:RevaluationReserve',
+        'fsa:OtherReserves',
+        'fsa:RetainedEarnings',
+        'fsa:LongtermLiabilitiesOtherThanProvisions',
+        'fsa:ShorttermLiabilitiesOtherThanProvisions',
     }
     try:
-        if dimensions is None:
-            values = [t for t in regnskab_dict[fieldName]
-                      if len(t.other_dimensions) == 0]
-        else:
-            values = [t for t in regnskab_dict[fieldName]
-                      if t.other_dimensions == dimensions]
+        values = [t for t in regnskab_dict[fieldName]]
+        if dimensions is not None:
+            values = [t for t in values if t.dimensions == dimensions]
+
         if len(values) == 0:
             raise ValueError('No tuples with fieldName %s' % fieldName)
         most_precise = get_most_precise(values)
@@ -96,8 +79,8 @@ def generic_number(regnskab_dict, fieldName, when_multiple=None,
     regnskabs_id = find_regnskabs_id()
     if regnskabs_id == 0:
         pprint(regnskab_dict, indent=2)
-    kind = get_regnskabsform(regnskabs_id)
-    if kind is not None and fieldName in regnskabsform_defaults[kind]:
+
+    if fieldName in regnskabsform_defaults:
         return 0
     return None
 
@@ -105,9 +88,10 @@ def generic_number(regnskab_dict, fieldName, when_multiple=None,
 def generic_text(regnskab_dict, fieldName, when_multiple='concatenate',
                  dimensions=None):
     values = regnskab_dict.get(fieldName, ())
-    if dimensions is None:
-        dimensions = []
-    xs = set(t.fieldValue for t in values if t.other_dimensions == dimensions)
+    if dimensions is not None:
+        values = [t for t in values if t.dimensions == dimensions]
+
+    xs = set(t.fieldValue for t in values)
     if xs:
         try:
             x, = xs
@@ -129,6 +113,8 @@ def generic_date(regnskab_dict, fieldName, when_multiple=None,
                  dimensions=None):
     try:
         values = regnskab_dict[fieldName]
+        if dimensions is not None:
+            values = [t for t in values if t.dimensions == dimensions]
     except KeyError:
         return None
 
@@ -168,7 +154,7 @@ class Header(Base):
     )
 
 
-def make_header(regnskab_dict, financial_statement_id, consolidated, session):
+def make_header(fs_dict, financial_statement_id, consolidated, session):
     instance = session.query(Header).filter(
         Header.financial_statement_id == financial_statement_id,
         Header.consolidated == consolidated
@@ -179,15 +165,15 @@ def make_header(regnskab_dict, financial_statement_id, consolidated, session):
 
     header_values = {
         'financial_statement_id': financial_statement_id,
-        'language': find_language(regnskab_dict),
-        'currency': find_currency(regnskab_dict),
-        'balancedato': find_balancedato(regnskab_dict),
+        'language': find_language(fs_dict),
+        'currency': find_currency(fs_dict),
+        'balancedato': find_balancedato(fs_dict),
         'consolidated': consolidated
     }
 
     try:
         header_values['gsd_IdentificationNumberCvrOfReportingEntity'] = (
-            generic_number(regnskab_dict,
+            generic_number(fs_dict,
                            'gsd:IdentificationNumberCvrOfReportingEntity')
         )
     except ValueError:
@@ -195,7 +181,7 @@ def make_header(regnskab_dict, financial_statement_id, consolidated, session):
 
     try:
         header_values['gsd_InformationOnTypeOfSubmittedReport'] = (
-            generic_text(regnskab_dict,
+            generic_text(fs_dict,
                          'gsd:InformationOnTypeOfSubmittedReport')
         )
     except ValueError:
@@ -203,21 +189,21 @@ def make_header(regnskab_dict, financial_statement_id, consolidated, session):
 
     try:
         header_values['gsd_ReportingPeriodStartDate'] = (
-            generic_date(regnskab_dict, 'gsd:ReportingPeriodStartDate')
+            generic_date(fs_dict, 'gsd:ReportingPeriodStartDate')
         )
     except ValueError:
         header_values['gsd_ReportingPeriodStartDate'] = None
 
     try:
         header_values['fsa_ClassOfReportingEntity'] = (
-            generic_text(regnskab_dict, 'fsa:ClassOfReportingEntity')
+            generic_text(fs_dict, 'fsa:ClassOfReportingEntity')
         )
     except ValueError:
         header_values['fsa_ClassOfReportingEntity'] = None
 
     try:
         header_values['cmn_TypeOfAuditorAssistance'] = (
-            generic_text(regnskab_dict, 'cmn:TypeOfAuditorAssistance',
+            generic_text(fs_dict, 'cmn:TypeOfAuditorAssistance',
                          when_multiple='any')
         )
     except ValueError:
@@ -274,19 +260,19 @@ def create_table(table_description, drop_table=False):
     return t
 
 
-def populate_row(table_description, regnskab_tuples, regnskabs_id,
+def populate_row(table_description, fs_entries, fs_id,
                  consolidated=False):
     """
     returns a dict with keys based on table_description and values
     read from regnskab_tuples based on the method in table_description
     """
     global current_regnskabs_id
-    current_regnskabs_id = regnskabs_id
-    regnskab_dict = dict([(k, list(v))
-                          for k, v in groupby(regnskab_tuples,
-                                              lambda k: k.fieldname)])
+    current_regnskabs_id = fs_id
+    fs_dict = dict([(k, list(v))
+                    for k, v in groupby(fs_entries,
+                                        lambda k: k.fieldName)])
     session = Session()
-    header = make_header(regnskab_dict, regnskabs_id, consolidated, session)
+    header = make_header(fs_dict, fs_id, consolidated, session)
     result = {'headerId': header.id}
     session.close()
 
@@ -299,14 +285,14 @@ def populate_row(table_description, regnskab_tuples, regnskabs_id,
         if 'when_multiple' in column_description['method'].keys():
             when_multiple = column_description['method']['when_multiple']
             result[column_name] = method_translation[methodname](
-                regnskab_dict,
+                fs_dict,
                 regnskabs_fieldname,
                 dimensions=dimensions,
                 when_multiple=when_multiple
             )
         else:
             result[column_name] = method_translation[methodname](
-                regnskab_dict,
+                fs_dict,
                 regnskabs_fieldname,
                 dimensions=dimensions,
             )
@@ -349,35 +335,11 @@ def populate_table(table_description, table):
     return
 
 
-def get_regnskabsform(regnskabs_id):
-    """
-    Every regnskab is reported according to some rules.
-    This function determines under which rules it is reported.
-    Concretely, this function returns the kind of regnskab
-    based on the 'xsd' filename.
-    """
-    try:
-        xsd_file = regnskabsform[regnskabs_id]
-        if ('AccountFormIncomeStatementByNature' in xsd_file or
-                'AccountFormIncomeStatementByFunction' in xsd_file):
-            return 1  # type 1.
-        elif 'AccountByCurrentAndLongTermFormIncomeStatement' in xsd_file:
-            return 2
-        elif 'ReportFormIncomeStatementByNature' in xsd_file:
-            return 3
-        elif 'ReportFormIncomeStatementByFunction' in xsd_file:
-            return 4
-    except KeyError:
-        pass
-
-    return None
-
-
 def find_regnskabs_id():
     return current_regnskabs_id
 
 
-def find_currency(regnskab_dict):
+def find_currency(fs_dict):
     """Check balance statements of regnskab to find the currency used.  We assume
     the same currency is used for everything, though this is not a requirement.
 
@@ -393,39 +355,37 @@ def find_currency(regnskab_dict):
                         'fsa:LiabilitiesOtherThanProvisions',
                         'fsa:ShorttermLiabilitiesOtherThanProvisions'])
 
-    for key, regnskab_tuples in regnskab_dict.items():
+    for key, fs_entries in fs_dict.items():
         if key not in balance_keys:
             continue
-        for t in regnskab_tuples:
-            if t.unitIdXbrl != '':
-                return t.unitIdXbrl
+        for t in fs_entries:
+            if t.unitIdXbrl is not None and t.unitIdXbrl[0:8] == 'iso4217:':
+                return t.unitIdXbrl[8:]
     return 'DKK'
 
 
 def find_language(regnskab_dict):
     """ Detects language from dict of text fields """
-    str_to_use = ''
     for key, regnskab_tuples in regnskab_dict.items():
         for t in regnskab_tuples:
-            if not isinstance(t.fieldValue, str):
-                break
-            if len(t.fieldValue) <= len(str_to_use):
-                continue
-            str_to_use = t.fieldValue
-    if len(str_to_use) > 20:
-        try:
-            return detect(str_to_use)
-        except LangDetectException:
-            return 'da'
+            if t.unitIdXbrl is not None and t.unitIdXbrl[0:5] == 'lang:':
+                return t.unitIdXbrl[5:]
     return 'da'
 
 
-def find_balancedato(regnskab_dict):
+def find_balancedato(fs_dict):
     try:
-        flattened = [item for sublist in regnskab_dict.values()
+        if 'gsd:ReportingPeriodEndDate' in fs_dict.keys():
+            date_format = '%Y-%m-%d'
+            end_date = fs_dict['gsd:ReportingPeriodEndDate'][0]
+            return datetime.datetime.strptime(end_date, date_format)
+    except Exception:
+        pass
+    try:
+        flattened = [item for sublist in fs_dict.values()
                      for item in sublist]
         return max(t.endDate for t in flattened)
-    except:
+    except Exception:
         pass
     return None
 
@@ -438,9 +398,16 @@ def get_most_precise(regnskab_tuples):
         Key for tuple of regnskabsid, fieldname, fieldvalue, decimals,
         precision, startDate, endDate, unitId.
         """
-        dec = -1000 if len(t.decimals) == 0 else float(t.decimals)
-        return ((t.startDate, t.endDate, (t.decimals.lower() == 'inf')
-                 or (t.precision.lower == 'inf'), dec, t.fieldValue))
+        dec = -1000
+        if (t.decimals is not None and len(t.decimals) > 0 and
+                t.decimals.lower() != 'inf'):
+            dec = float(t.decimals)
+        is_dec_inf = False
+        if t.decimals is not None and t.decimals.lower() == 'inf':
+            is_dec_inf = True
+
+        return (t.startDate, t.endDate, is_dec_inf,
+                dec, t.fieldValue)
 
     regnskab_tuples.sort(key=order_key, reverse=True)
     return regnskab_tuples[0].fieldValue
@@ -460,8 +427,6 @@ def register_method(name, func):
 
 
 def main(table_descriptions_file):
-    global regnskabsform
-    regnskabsform = fetch_regnskabsform_dict()
     Base.metadata.create_all(engine)
     tables = dict()
 

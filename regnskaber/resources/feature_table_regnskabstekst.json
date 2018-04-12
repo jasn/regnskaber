@@ -585,8 +585,8 @@
       {
         "name": "cmn_DescriptionOfAuditor",
         "sqltype": "Text(2147483648)",
-        "regnskabs_fieldname": "cmn:DescriptionOfAuditor",
-        "dimensions": null,
+        "regnskabs_fieldname": "cmn:DescriptionOfAuditor_auditorIdentifier",
+        "dimensions": "0",
         "method": {
           "name": "generic_text"
         }
@@ -603,8 +603,8 @@
       {
         "name": "cmn_NameAndSurnameOfAuditor",
         "sqltype": "Text(2147483648)",
-        "regnskabs_fieldname": "cmn:NameAndSurnameOfAuditor",
-        "dimensions": null,
+        "regnskabs_fieldname": "cmn:NameAndSurnameOfAuditor_auditorIdentifier",
+        "dimensions": "0",
         "method": {
           "name": "generic_text"
         }
@@ -612,8 +612,8 @@
       {
         "name": "cmn_NameOfAuditFirm",
         "sqltype": "Text(2147483648)",
-        "regnskabs_fieldname": "cmn:NameOfAuditFirm",
-        "dimensions": null,
+        "regnskabs_fieldname": "cmn:NameOfAuditFirm_auditorIdentifier",
+        "dimensions": "0",
         "method": {
           "name": "generic_text"
         }
