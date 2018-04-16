@@ -14,7 +14,6 @@ setup(
     license='MIT',
     packages=['regnskaber'],
     install_requires=[
-        'Arelle==1.0',
         'certifi>=2017.7.27.1',
         'chardet>=3.0.4',
         'elasticsearch1>=1.10.0',
@@ -31,7 +30,6 @@ setup(
         'urllib3>=1.22',
     ],
     dependency_links=[
-        'git+https://github.com/Arelle/Arelle.git@a6a758ceda0ff8c4ddf33e5fc174bf892098763d#egg=Arelle-1.0'
     ],
     package_data={
         'regnskaber': ['resources/*.json', 'resources/aarl.zip']
