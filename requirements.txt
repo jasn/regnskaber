@@ -12,3 +12,4 @@ requests==2.18.4
 six==1.11.0
 SQLAlchemy==1.1.14
 urllib3==1.22
+-e git+https://github.com/Niels-Peter/XBRL-AI.git@8a90c18ed495487797c6f82d0e6bc8618b5c0bce#egg=xbrl_ai-0.2

@@ -28,8 +28,10 @@ setup(
         'six>=1.11.0',
         'SQLAlchemy>=1.1.14',
         'urllib3>=1.22',
+        'xbrl_ai>=0.2',
     ],
     dependency_links=[
+        'git+https://github.com/Niels-Peter/XBRL-AI.git@8a90c18ed495487797c6f82d0e6bc8618b5c0bce#egg=xbrl_ai-0.2',
     ],
     package_data={
         'regnskaber': ['resources/*.json', 'resources/aarl.zip']
