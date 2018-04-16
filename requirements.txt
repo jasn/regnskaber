@@ -7,9 +7,13 @@ isodate==0.5.4
 langdetect==1.0.7
 lxml==4.0.0
 mysqlclient==1.3.12
+numpy==1.14.2
 python-dateutil==2.6.1
 requests==2.18.4
+scipy==1.0.1
 six==1.11.0
+sklearn==0.0
 SQLAlchemy==1.1.14
 urllib3==1.22
+xmljson==0.1.9
 -e git+https://github.com/Niels-Peter/XBRL-AI.git@8a90c18ed495487797c6f82d0e6bc8618b5c0bce#egg=xbrl_ai-0.2
